@@ -1,0 +1,928 @@
+{
+  "kind": "SourceFile",
+  "pos": {
+    "line": 1,
+    "column": 1
+  },
+  "children": [
+    {
+      "kind": "SyntaxList",
+      "pos": {
+        "line": 1,
+        "column": 1
+      },
+      "children": [
+        {
+          "kind": "ClassDeclaration",
+          "pos": {
+            "line": 1,
+            "column": 1
+          },
+          "children": [
+            {
+              "kind": "SyntaxList",
+              "pos": {
+                "line": 1,
+                "column": 1
+              },
+              "children": [
+                {
+                  "kind": "Decorator",
+                  "pos": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "children": [
+                    {
+                      "kind": "AtToken",
+                      "pos": {
+                        "line": 1,
+                        "column": 1
+                      },
+                      "content": "@"
+                    },
+                    {
+                      "kind": "Identifier",
+                      "pos": {
+                        "line": 1,
+                        "column": 2
+                      },
+                      "content": "KotlinExportClass"
+                    }
+                  ]
+                },
+                {
+                  "kind": "Decorator",
+                  "pos": {
+                    "line": 2,
+                    "column": 1
+                  },
+                  "children": [
+                    {
+                      "kind": "AtToken",
+                      "pos": {
+                        "line": 2,
+                        "column": 1
+                      },
+                      "content": "@"
+                    },
+                    {
+                      "kind": "CallExpression",
+                      "pos": {
+                        "line": 2,
+                        "column": 2
+                      },
+                      "children": [
+                        {
+                          "kind": "Identifier",
+                          "pos": {
+                            "line": 2,
+                            "column": 2
+                          },
+                          "content": "KotlinExportType"
+                        },
+                        {
+                          "kind": "OpenParenToken",
+                          "pos": {
+                            "line": 2,
+                            "column": 18
+                          },
+                          "content": "("
+                        },
+                        {
+                          "kind": "SyntaxList",
+                          "pos": {
+                            "line": 2,
+                            "column": 19
+                          },
+                          "children": [
+                            {
+                              "kind": "BinaryExpression",
+                              "pos": {
+                                "line": 2,
+                                "column": 19
+                              },
+                              "children": [
+                                {
+                                  "kind": "Identifier",
+                                  "pos": {
+                                    "line": 2,
+                                    "column": 19
+                                  },
+                                  "content": "type"
+                                },
+                                {
+                                  "kind": "FirstAssignment",
+                                  "pos": {
+                                    "line": 2,
+                                    "column": 24
+                                  },
+                                  "content": "="
+                                },
+                                {
+                                  "kind": "StringLiteral",
+                                  "pos": {
+                                    "line": 2,
+                                    "column": 26
+                                  },
+                                  "content": "\"Proxy\""
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "CommaToken",
+                              "pos": {
+                                "line": 2,
+                                "column": 33
+                              },
+                              "content": ","
+                            },
+                            {
+                              "kind": "BinaryExpression",
+                              "pos": {
+                                "line": 2,
+                                "column": 35
+                              },
+                              "children": [
+                                {
+                                  "kind": "Identifier",
+                                  "pos": {
+                                    "line": 2,
+                                    "column": 35
+                                  },
+                                  "content": "lang"
+                                },
+                                {
+                                  "kind": "FirstAssignment",
+                                  "pos": {
+                                    "line": 2,
+                                    "column": 40
+                                  },
+                                  "content": "="
+                                },
+                                {
+                                  "kind": "StringLiteral",
+                                  "pos": {
+                                    "line": 2,
+                                    "column": 42
+                                  },
+                                  "content": "\"Kotlin\""
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "kind": "CloseParenToken",
+                          "pos": {
+                            "line": 2,
+                            "column": 50
+                          },
+                          "content": ")"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "ClassKeyword",
+              "pos": {
+                "line": 3,
+                "column": 1
+              },
+              "content": "class"
+            },
+            {
+              "kind": "Identifier",
+              "pos": {
+                "line": 3,
+                "column": 7
+              },
+              "content": "Bar"
+            },
+            {
+              "kind": "FirstPunctuation",
+              "pos": {
+                "line": 3,
+                "column": 11
+              },
+              "content": "{"
+            },
+            {
+              "kind": "SyntaxList",
+              "pos": {
+                "line": 4,
+                "column": 3
+              },
+              "children": [
+                {
+                  "kind": "PropertyDeclaration",
+                  "pos": {
+                    "line": 4,
+                    "column": 3
+                  },
+                  "children": [
+                    {
+                      "kind": "SyntaxList",
+                      "pos": {
+                        "line": 4,
+                        "column": 3
+                      },
+                      "children": [
+                        {
+                          "kind": "Decorator",
+                          "pos": {
+                            "line": 4,
+                            "column": 3
+                          },
+                          "children": [
+                            {
+                              "kind": "AtToken",
+                              "pos": {
+                                "line": 4,
+                                "column": 3
+                              },
+                              "content": "@"
+                            },
+                            {
+                              "kind": "CallExpression",
+                              "pos": {
+                                "line": 4,
+                                "column": 4
+                              },
+                              "children": [
+                                {
+                                  "kind": "Identifier",
+                                  "pos": {
+                                    "line": 4,
+                                    "column": 4
+                                  },
+                                  "content": "KotlinExportField"
+                                },
+                                {
+                                  "kind": "OpenParenToken",
+                                  "pos": {
+                                    "line": 4,
+                                    "column": 21
+                                  },
+                                  "content": "("
+                                },
+                                {
+                                  "kind": "SyntaxList",
+                                  "pos": {
+                                    "line": 4,
+                                    "column": 22
+                                  },
+                                  "children": [
+                                    {
+                                      "kind": "BinaryExpression",
+                                      "pos": {
+                                        "line": 4,
+                                        "column": 22
+                                      },
+                                      "children": [
+                                        {
+                                          "kind": "Identifier",
+                                          "pos": {
+                                            "line": 4,
+                                            "column": 22
+                                          },
+                                          "content": "alias"
+                                        },
+                                        {
+                                          "kind": "FirstAssignment",
+                                          "pos": {
+                                            "line": 4,
+                                            "column": 28
+                                          },
+                                          "content": "="
+                                        },
+                                        {
+                                          "kind": "StringLiteral",
+                                          "pos": {
+                                            "line": 4,
+                                            "column": 30
+                                          },
+                                          "content": "\"json_value\""
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "kind": "CommaToken",
+                                      "pos": {
+                                        "line": 4,
+                                        "column": 42
+                                      },
+                                      "content": ","
+                                    },
+                                    {
+                                      "kind": "BinaryExpression",
+                                      "pos": {
+                                        "line": 4,
+                                        "column": 44
+                                      },
+                                      "children": [
+                                        {
+                                          "kind": "Identifier",
+                                          "pos": {
+                                            "line": 4,
+                                            "column": 44
+                                          },
+                                          "content": "type"
+                                        },
+                                        {
+                                          "kind": "FirstAssignment",
+                                          "pos": {
+                                            "line": 4,
+                                            "column": 49
+                                          },
+                                          "content": "="
+                                        },
+                                        {
+                                          "kind": "StringLiteral",
+                                          "pos": {
+                                            "line": 4,
+                                            "column": 51
+                                          },
+                                          "content": "\"Int\""
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "kind": "CloseParenToken",
+                                  "pos": {
+                                    "line": 4,
+                                    "column": 56
+                                  },
+                                  "content": ")"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "Identifier",
+                      "pos": {
+                        "line": 5,
+                        "column": 3
+                      },
+                      "content": "value"
+                    },
+                    {
+                      "kind": "ColonToken",
+                      "pos": {
+                        "line": 5,
+                        "column": 9
+                      },
+                      "content": ":"
+                    },
+                    {
+                      "kind": "NumberKeyword",
+                      "pos": {
+                        "line": 5,
+                        "column": 11
+                      },
+                      "content": "number"
+                    }
+                  ]
+                },
+                {
+                  "kind": "MethodDeclaration",
+                  "pos": {
+                    "line": 7,
+                    "column": 3
+                  },
+                  "children": [
+                    {
+                      "kind": "SyntaxList",
+                      "pos": {
+                        "line": 7,
+                        "column": 3
+                      },
+                      "children": [
+                        {
+                          "kind": "Decorator",
+                          "pos": {
+                            "line": 7,
+                            "column": 3
+                          },
+                          "children": [
+                            {
+                              "kind": "AtToken",
+                              "pos": {
+                                "line": 7,
+                                "column": 3
+                              },
+                              "content": "@"
+                            },
+                            {
+                              "kind": "Identifier",
+                              "pos": {
+                                "line": 7,
+                                "column": 4
+                              },
+                              "content": "KotlinExportFunction"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "Identifier",
+                      "pos": {
+                        "line": 8,
+                        "column": 3
+                      },
+                      "content": "bar"
+                    },
+                    {
+                      "kind": "OpenParenToken",
+                      "pos": {
+                        "line": 8,
+                        "column": 6
+                      },
+                      "content": "("
+                    },
+                    {
+                      "kind": "SyntaxList",
+                      "pos": {
+                        "line": 8,
+                        "column": 7
+                      },
+                      "children": [
+                        {
+                          "kind": "Parameter",
+                          "pos": {
+                            "line": 8,
+                            "column": 7
+                          },
+                          "children": [
+                            {
+                              "kind": "Identifier",
+                              "pos": {
+                                "line": 8,
+                                "column": 7
+                              },
+                              "content": "x"
+                            },
+                            {
+                              "kind": "ColonToken",
+                              "pos": {
+                                "line": 8,
+                                "column": 8
+                              },
+                              "content": ":"
+                            },
+                            {
+                              "kind": "NumberKeyword",
+                              "pos": {
+                                "line": 8,
+                                "column": 10
+                              },
+                              "content": "number"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "CloseParenToken",
+                      "pos": {
+                        "line": 8,
+                        "column": 16
+                      },
+                      "content": ")"
+                    },
+                    {
+                      "kind": "ColonToken",
+                      "pos": {
+                        "line": 8,
+                        "column": 17
+                      },
+                      "content": ":"
+                    },
+                    {
+                      "kind": "NumberKeyword",
+                      "pos": {
+                        "line": 8,
+                        "column": 19
+                      },
+                      "content": "number"
+                    },
+                    {
+                      "kind": "Block",
+                      "pos": {
+                        "line": 8,
+                        "column": 26
+                      },
+                      "children": [
+                        {
+                          "kind": "FirstPunctuation",
+                          "pos": {
+                            "line": 8,
+                            "column": 26
+                          },
+                          "content": "{"
+                        },
+                        {
+                          "kind": "SyntaxList",
+                          "pos": {
+                            "line": 9,
+                            "column": 5
+                          },
+                          "children": [
+                            {
+                              "kind": "ReturnStatement",
+                              "pos": {
+                                "line": 9,
+                                "column": 5
+                              },
+                              "children": [
+                                {
+                                  "kind": "ReturnKeyword",
+                                  "pos": {
+                                    "line": 9,
+                                    "column": 5
+                                  },
+                                  "content": "return"
+                                },
+                                {
+                                  "kind": "BinaryExpression",
+                                  "pos": {
+                                    "line": 9,
+                                    "column": 12
+                                  },
+                                  "children": [
+                                    {
+                                      "kind": "Identifier",
+                                      "pos": {
+                                        "line": 9,
+                                        "column": 12
+                                      },
+                                      "content": "x"
+                                    },
+                                    {
+                                      "kind": "PlusToken",
+                                      "pos": {
+                                        "line": 9,
+                                        "column": 14
+                                      },
+                                      "content": "+"
+                                    },
+                                    {
+                                      "kind": "FirstLiteralToken",
+                                      "pos": {
+                                        "line": 9,
+                                        "column": 16
+                                      },
+                                      "content": "1"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "kind": "CloseBraceToken",
+                          "pos": {
+                            "line": 10,
+                            "column": 3
+                          },
+                          "content": "}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "CloseBraceToken",
+              "pos": {
+                "line": 11,
+                "column": 1
+              },
+              "content": "}"
+            }
+          ]
+        },
+        {
+          "kind": "FunctionDeclaration",
+          "pos": {
+            "line": 13,
+            "column": 1
+          },
+          "children": [
+            {
+              "kind": "SyntaxList",
+              "pos": {
+                "line": 13,
+                "column": 1
+              },
+              "children": [
+                {
+                  "kind": "Decorator",
+                  "pos": {
+                    "line": 13,
+                    "column": 1
+                  },
+                  "children": [
+                    {
+                      "kind": "AtToken",
+                      "pos": {
+                        "line": 13,
+                        "column": 1
+                      },
+                      "content": "@"
+                    },
+                    {
+                      "kind": "CallExpression",
+                      "pos": {
+                        "line": 13,
+                        "column": 2
+                      },
+                      "children": [
+                        {
+                          "kind": "Identifier",
+                          "pos": {
+                            "line": 13,
+                            "column": 2
+                          },
+                          "content": "KotlinExportFunction"
+                        },
+                        {
+                          "kind": "OpenParenToken",
+                          "pos": {
+                            "line": 13,
+                            "column": 22
+                          },
+                          "content": "("
+                        },
+                        {
+                          "kind": "SyntaxList",
+                          "pos": {
+                            "line": 13,
+                            "column": 23
+                          },
+                          "children": [
+                            {
+                              "kind": "BinaryExpression",
+                              "pos": {
+                                "line": 13,
+                                "column": 23
+                              },
+                              "children": [
+                                {
+                                  "kind": "Identifier",
+                                  "pos": {
+                                    "line": 13,
+                                    "column": 23
+                                  },
+                                  "content": "type"
+                                },
+                                {
+                                  "kind": "FirstAssignment",
+                                  "pos": {
+                                    "line": 13,
+                                    "column": 28
+                                  },
+                                  "content": "="
+                                },
+                                {
+                                  "kind": "StringLiteral",
+                                  "pos": {
+                                    "line": 13,
+                                    "column": 30
+                                  },
+                                  "content": "\"abc\""
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "kind": "CloseParenToken",
+                          "pos": {
+                            "line": 13,
+                            "column": 35
+                          },
+                          "content": ")"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "FunctionKeyword",
+              "pos": {
+                "line": 14,
+                "column": 1
+              },
+              "content": "function"
+            },
+            {
+              "kind": "Identifier",
+              "pos": {
+                "line": 14,
+                "column": 10
+              },
+              "content": "global_foo"
+            },
+            {
+              "kind": "OpenParenToken",
+              "pos": {
+                "line": 14,
+                "column": 20
+              },
+              "content": "("
+            },
+            {
+              "kind": "SyntaxList",
+              "pos": {
+                "line": 14,
+                "column": 21
+              },
+              "children": [
+                {
+                  "kind": "Parameter",
+                  "pos": {
+                    "line": 14,
+                    "column": 21
+                  },
+                  "children": [
+                    {
+                      "kind": "Identifier",
+                      "pos": {
+                        "line": 14,
+                        "column": 21
+                      },
+                      "content": "x"
+                    },
+                    {
+                      "kind": "ColonToken",
+                      "pos": {
+                        "line": 14,
+                        "column": 22
+                      },
+                      "content": ":"
+                    },
+                    {
+                      "kind": "NumberKeyword",
+                      "pos": {
+                        "line": 14,
+                        "column": 24
+                      },
+                      "content": "number"
+                    }
+                  ]
+                },
+                {
+                  "kind": "CommaToken",
+                  "pos": {
+                    "line": 14,
+                    "column": 30
+                  },
+                  "content": ","
+                },
+                {
+                  "kind": "Parameter",
+                  "pos": {
+                    "line": 14,
+                    "column": 32
+                  },
+                  "children": [
+                    {
+                      "kind": "Identifier",
+                      "pos": {
+                        "line": 14,
+                        "column": 32
+                      },
+                      "content": "y"
+                    },
+                    {
+                      "kind": "ColonToken",
+                      "pos": {
+                        "line": 14,
+                        "column": 33
+                      },
+                      "content": ":"
+                    },
+                    {
+                      "kind": "StringKeyword",
+                      "pos": {
+                        "line": 14,
+                        "column": 35
+                      },
+                      "content": "string"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "CloseParenToken",
+              "pos": {
+                "line": 14,
+                "column": 41
+              },
+              "content": ")"
+            },
+            {
+              "kind": "Block",
+              "pos": {
+                "line": 14,
+                "column": 43
+              },
+              "children": [
+                {
+                  "kind": "FirstPunctuation",
+                  "pos": {
+                    "line": 14,
+                    "column": 43
+                  },
+                  "content": "{"
+                },
+                {
+                  "kind": "SyntaxList",
+                  "pos": {
+                    "line": 15,
+                    "column": 3
+                  },
+                  "children": [
+                    {
+                      "kind": "ExpressionStatement",
+                      "pos": {
+                        "line": 15,
+                        "column": 3
+                      },
+                      "children": [
+                        {
+                          "kind": "Identifier",
+                          "pos": {
+                            "line": 15,
+                            "column": 3
+                          },
+                          "content": "bala"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "ReturnStatement",
+                      "pos": {
+                        "line": 16,
+                        "column": 3
+                      },
+                      "children": [
+                        {
+                          "kind": "ReturnKeyword",
+                          "pos": {
+                            "line": 16,
+                            "column": 3
+                          },
+                          "content": "return"
+                        },
+                        {
+                          "kind": "FirstLiteralToken",
+                          "pos": {
+                            "line": 16,
+                            "column": 10
+                          },
+                          "content": "10"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "CloseBraceToken",
+                  "pos": {
+                    "line": 17,
+                    "column": 1
+                  },
+                  "content": "}"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "EndOfFileToken",
+      "pos": {
+        "line": 17,
+        "column": 2
+      },
+      "content": ""
+    }
+  ]
+}

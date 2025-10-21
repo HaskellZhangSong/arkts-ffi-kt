@@ -1,0 +1,5 @@
+@KotlinExportClass
+@KotlinExportType
+class Bar {
+
+}

@@ -1,0 +1,134 @@
+{
+  "kind": "SourceFile",
+  "pos": {
+    "line": 1,
+    "column": 1
+  },
+  "children": [
+    {
+      "kind": "SyntaxList",
+      "pos": {
+        "line": 1,
+        "column": 1
+      },
+      "children": [
+        {
+          "kind": "ClassDeclaration",
+          "pos": {
+            "line": 1,
+            "column": 1
+          },
+          "children": [
+            {
+              "kind": "SyntaxList",
+              "pos": {
+                "line": 1,
+                "column": 1
+              },
+              "children": [
+                {
+                  "kind": "Decorator",
+                  "pos": {
+                    "line": 1,
+                    "column": 1
+                  },
+                  "children": [
+                    {
+                      "kind": "AtToken",
+                      "pos": {
+                        "line": 1,
+                        "column": 1
+                      },
+                      "content": "@"
+                    },
+                    {
+                      "kind": "Identifier",
+                      "pos": {
+                        "line": 1,
+                        "column": 2
+                      },
+                      "content": "KotlinExportClass"
+                    }
+                  ]
+                },
+                {
+                  "kind": "Decorator",
+                  "pos": {
+                    "line": 2,
+                    "column": 1
+                  },
+                  "children": [
+                    {
+                      "kind": "AtToken",
+                      "pos": {
+                        "line": 2,
+                        "column": 1
+                      },
+                      "content": "@"
+                    },
+                    {
+                      "kind": "Identifier",
+                      "pos": {
+                        "line": 2,
+                        "column": 2
+                      },
+                      "content": "KotlinExportType"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "ClassKeyword",
+              "pos": {
+                "line": 3,
+                "column": 1
+              },
+              "content": "class"
+            },
+            {
+              "kind": "Identifier",
+              "pos": {
+                "line": 3,
+                "column": 7
+              },
+              "content": "Bar"
+            },
+            {
+              "kind": "FirstPunctuation",
+              "pos": {
+                "line": 3,
+                "column": 11
+              },
+              "content": "{"
+            },
+            {
+              "kind": "SyntaxList",
+              "pos": {
+                "line": 3,
+                "column": 12
+              },
+              "content": ""
+            },
+            {
+              "kind": "CloseBraceToken",
+              "pos": {
+                "line": 5,
+                "column": 1
+              },
+              "content": "}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "EndOfFileToken",
+      "pos": {
+        "line": 5,
+        "column": 2
+      },
+      "content": ""
+    }
+  ]
+}
