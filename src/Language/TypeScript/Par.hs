@@ -18,6 +18,8 @@ pSourceFile :: Parser SourceFile
 pSourceFile = do
     pushKindChildren "SourceFile"
     pushKindChildren "SyntaxList"
+    -- ignore import declarations
+    _ <- many (skipKind "ImportDeclaration")
     decs <- pDecls
     pop -- pop Eof
     nodes <- get
