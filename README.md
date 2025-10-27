@@ -42,5 +42,5 @@ Installing executable arkts-ffi-kt-exe in /Users/songzh/project/haskell/arkts-ff
 
 ```
 node index.js my_test.ets -o example2.json
-arkts-ffi-kt-exe example2.json -o test.kt
+arkts-ffi-kt-exe -i example2.json -o test.kt
 ```
