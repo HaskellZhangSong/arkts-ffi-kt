@@ -11,6 +11,7 @@ import qualified Data.Text.Prettyprint.Doc as Kt
 import Language.TypeScript.AST
 import Language.Kotlin.AST
 import qualified Language.TypeScript.AST as Ts
+import Control.Exception (Deadlock)
 
 convertDecl :: Decl -> Kt.KotlinDeclaration
 convertDecl (Ts.FuncDecl f) = Kt.FunctionDecl $ convertFunc f
@@ -36,43 +37,50 @@ convertClass (ClassD decos name superclasses members) =
 
 
 convertFunc :: FuncD -> Kt.Function
-convertFunc (FuncD ty name decos params retTy) =
+convertFunc f@(FuncD ty name decos params retTy) =
     Kt.Function
         { Kt.functionName = name
         , Kt.functionModifiers = []
         , functionTypeParameters = []
-        , Kt.functionParameters = map convertParameter params
-        , Kt.functionReturnType = Just $ convertType retTy
-        , Kt.functionBody = Nothing
+        , Kt.functionParameters = map (convertParameter decos) params
+        , Kt.functionReturnType = Just $ convertType decos retTy
+        , Kt.functionBody = Just $ convertFunctionBody f
         }
 
-convertParameter :: (String, Type) -> Kt.Parameter
-convertParameter (name, ty) =
+convertFunctionBody :: FuncD -> Kt.FunctionBody
+convertFunctionBody (FuncD funTy name decos params retTy) =
+    case funTy of 
+        Method -> Kt.BlockBody [ReturnStmt (Just $ CallExpr (IdentifierExpr "BarProxy")  
+                                                    [RefType "Reference"]
+                                                    [LiteralString name])]
+                                                    
+convertParameter :: [Decorator] -> (String, Type) -> Kt.Parameter
+convertParameter ds (name, ty) =
     Kt.Parameter
         { Kt.parameterName = name
-        , Kt.parameterType = convertType ty
+        , Kt.parameterType = convertType ds ty
         , parameterDefaultValue = Nothing
         , parameterModifiers = []
         }
 
-convertType :: Ts.Type -> Kt.KotlinType
-convertType (TyRef name) = Kt.RefType name
-convertType (TyNullable ty) = NullableType (convertType ty)
-convertType _ = error "not implemented"
+convertType :: [Decorator] -> Ts.Type -> Kt.KotlinType
+convertType d (TyRef name) = Kt.RefType name
+convertType d (TyNullable ty) = NullableType (convertType d ty)
+convertType d _ = error "not implemented"
 
 convertVar :: Ts.VarD -> Kt.Property
 convertVar (VarD decos name ty) =
     Kt.Property
         { propertyName = name
         , propertyModifiers = [Kt.M_Var]
-        , propertyType = Just $ convertType ty
+        , propertyType = Just $ convertType decos ty
         , propertyInitializer = Nothing
         , propertyGetter = Just $ Kt.PropertyAccessor {
             accessorModifiers = [],
-            accessorBody = Just $ ExpressionBody $ CallExpr (IdentifierExpr "getInt") [LiteralString name]
+            accessorBody = Just $ ExpressionBody $ CallExpr (IdentifierExpr "getInt") [] [LiteralString name]
         }
         , propertySetter = Just $ Kt.PropertyAccessor {
             accessorModifiers = [],
-            accessorBody = Just $ ExpressionBody $ CallExpr (IdentifierExpr "setInt") [LiteralString name, IdentifierExpr "value"]
+            accessorBody = Just $ ExpressionBody $ CallExpr (IdentifierExpr "setInt") [] [LiteralString name, IdentifierExpr "value"]
         }
     }

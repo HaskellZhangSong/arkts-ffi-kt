@@ -195,7 +195,7 @@ data PropertyAccessor = PropertyAccessor
 data Expression
   = LiteralString String
   | IdentifierExpr String
-  | CallExpr Expression [Expression]
+  | CallExpr Expression [KotlinType] [Expression]
   | MemberExpr Expression String
   | ThisExpr
   | SuperExpr
@@ -396,7 +396,9 @@ instance Pretty PropertyAccessor where
 instance Pretty Expression where
   pretty (LiteralString lit) = dquotes $ pretty lit
   pretty (IdentifierExpr name) = pretty name
-  pretty (CallExpr func args) = pretty func <> parens (hsep $ punctuate comma $ map pretty args)
+  pretty (CallExpr func ty args) = pretty func <>
+                                      if null ty then mempty else "<" <> hsep (punctuate comma $ map pretty ty) <> ">" <>
+                                      parens (hsep $ punctuate comma $ map pretty args)
   pretty (MemberExpr obj member) = pretty obj <> "." <> pretty member
   pretty ThisExpr = "this"
   pretty SuperExpr = "super"
