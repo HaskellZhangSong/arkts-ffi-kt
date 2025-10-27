@@ -35,6 +35,9 @@ dependencies:
 - mtl
 - transformers
 - attoparsec
+- parsec
+
+
 ghc-options:
 - -Wall
 - -Wcompat
