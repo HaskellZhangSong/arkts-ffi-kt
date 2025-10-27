@@ -383,7 +383,7 @@ instance Pretty Variance where
 
 instance Pretty FunctionBody where
   pretty (ExpressionBody expr) = "=" <+> pretty expr
-  pretty (BlockBody stmts) = "{" <> line <> indent 2 (vsep $ map pretty stmts) <> line <> "}"
+  pretty (BlockBody stmts) = "" <+> "{" <> line <> indent 2 (vsep $ map pretty stmts) <> line <> "}"
 
 instance Pretty ConstructorBody where
   pretty (DelegatingConstructor args) = ":" <+> "this" <> parens (hsep $ punctuate comma $ map pretty args)
