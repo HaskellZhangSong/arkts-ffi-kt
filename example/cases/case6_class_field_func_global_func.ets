@@ -5,8 +5,8 @@ class Bar {
   @KotlinExportField(type = "Int")
   value : number
   
-  @KotlinExportFunction(type = "Int", type = "Double", type = "FooProxy", type = "Double")
-  bar(x: number, y : number ,z : Foo): number {
+  @KotlinExportFunction(type = "Int", type = "Double", type = "FooProxy", type = "BarProxy")
+  bar(x: number, y : number ,z : Foo): Bar {
     return x + 1
   }
 }

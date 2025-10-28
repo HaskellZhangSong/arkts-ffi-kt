@@ -572,7 +572,7 @@
                                             "line": 8,
                                             "column": 82
                                           },
-                                          "content": "\"Double\""
+                                          "content": "\"BarProxy\""
                                         }
                                       ]
                                     }
@@ -582,7 +582,7 @@
                                   "kind": "CloseParenToken",
                                   "pos": {
                                     "line": 8,
-                                    "column": 90
+                                    "column": 92
                                   },
                                   "content": ")"
                                 }
@@ -758,25 +758,34 @@
                       "content": ":"
                     },
                     {
-                      "kind": "NumberKeyword",
+                      "kind": "TypeReference",
                       "pos": {
                         "line": 9,
                         "column": 40
                       },
-                      "content": "number"
+                      "children": [
+                        {
+                          "kind": "Identifier",
+                          "pos": {
+                            "line": 9,
+                            "column": 40
+                          },
+                          "content": "Bar"
+                        }
+                      ]
                     },
                     {
                       "kind": "Block",
                       "pos": {
                         "line": 9,
-                        "column": 47
+                        "column": 44
                       },
                       "children": [
                         {
                           "kind": "FirstPunctuation",
                           "pos": {
                             "line": 9,
-                            "column": 47
+                            "column": 44
                           },
                           "content": "{"
                         },

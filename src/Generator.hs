@@ -11,7 +11,6 @@ import qualified Data.List as L (lookup, find)
 import Data.Maybe (fromJust)
 import Debug.Trace
 
-
 convertSourceFile :: SourceFile -> Kt.KotlinFile
 convertSourceFile (SourceFile decls) =
     Kt.KotlinFile
@@ -28,8 +27,7 @@ convertDecl (Ts.ClassDecl c) = Kt.ClassDecl $ convertClass c
 convertClassMember :: Decl -> Kt.ClassMember
 convertClassMember (Ts.FuncDecl f) = Kt.ClassFunction $ convertFunc f
 convertClassMember (Ts.VarDecl v) = Kt.ClassProperty $ convertVar v
-convertClassMember (Ts.ClassDecl v) = error "Nested classes not supported"
-convertClassMember _ = error "Unsupported class member"
+convertClassMember (Ts.ClassDecl v) = error $ "Nested classes not supported" ++ show v
 
 convertClass :: ClassD -> Kt.Class
 convertClass (ClassD decos name superclasses members) = 
@@ -44,25 +42,83 @@ convertClass (ClassD decos name superclasses members) =
         , classBody = map convertClassMember members
         }
 
-
 convertFunc :: FuncD -> Kt.Function
-convertFunc f@(FuncD ty name decos params retTy) =
-    Kt.Function
-        { Kt.functionName = name
-        , Kt.functionModifiers = []
-        , functionTypeParameters = []
-        , Kt.functionParameters = map (convertParameter decos) params
-        , Kt.functionReturnType = Just $ convertType decos retTy
-        , Kt.functionBody = Just $ convertFunctionBody f
-        }
+convertFunc f@(FuncD _ name decos params ret_ty) =
+    let deco_fun = findDecorator "KotlinExportFunction" decos
+        in case deco_fun of
+            Just (DecoratorPara _ ps) -> 
+                if length ps /= length params + 1
+                    then error $ "KotlinExportFunction decorator parameter length "
+                                 ++ show (length ps)
+                                 ++ " does not match function parameter + return type length "
+                                 ++ show (length params)
+                    else
+                Kt.Function
+                { Kt.functionName = name
+                , Kt.functionModifiers = []
+                , functionTypeParameters = []
+                , Kt.functionParameters = map (\(ts, kt) -> constructParam ts kt) (zip params ps)
+                , Kt.functionReturnType = Just $ let (_, kt) = last ps 
+                                                     parsed_kt_ty = pKtType kt
+                                                in  parsed_kt_ty
+                , Kt.functionBody = Just $ convertFunctionBody f
+                }
+            Nothing -> Kt.Function
+                { Kt.functionName = name
+                , Kt.functionModifiers = []
+                , functionTypeParameters = []
+                , Kt.functionParameters = map (convertParameter decos) params
+                , Kt.functionReturnType = Just $ defaultType ret_ty
+                , Kt.functionBody = Just $ convertFunctionBody f
+                }
+            _ -> error $ "KotlinExportFunction decorator missing parameters"
 
 convertFunctionBody :: FuncD -> Kt.FunctionBody
-convertFunctionBody (FuncD funTy name decos params retTy) =
-    case funTy of
-        Method -> Kt.BlockBody [ReturnStmt (Just $ CallExpr (IdentifierExpr "BarProxy")  
-                                                    [RefType "Reference"]
-                                                    [LiteralString name])]
+convertFunctionBody (FuncD fun_ty name decos params ret_ty) =
+    let deco_ret_kt_ty = findDecorator "KotlinExportFunction" decos
+        para_kt_nm_tys = case deco_ret_kt_ty of
+                            Just (DecoratorPara _ ps) -> map (\((_, deco_t), (n, _)) -> (n, pKtType deco_t)) (zip (init ps) params)
+                            _ -> map (\(n,t) -> (n, defaultType t)) params
+        ret_kt_ty = case deco_ret_kt_ty of
+                        Just (DecoratorPara _ ps) -> let (_, kt) = last ps 
+                                                        in  pKtType kt
+                        _ -> defaultType ret_ty
+    in
+    case fun_ty of
+        Method -> if Kt.isPrimType ret_kt_ty
+                    then Kt.BlockBody $ [ExpressionStmt $ CallExpr (IdentifierExpr "callMethod")
+                                                    [RefType (refTypeName ret_kt_ty)]
+                                                    -- if Argument is primitive, pass value directly
+                                                    -- if Argument is reference, pass x.ref
+                                                    (LiteralString name : map (\(param_nm, kt_ty) -> 
+                                                        if Kt.isPrimType kt_ty
+                                                            then IdentifierExpr param_nm
+                                                            else MemberExpr (IdentifierExpr param_nm) "ref") 
+                                                        para_kt_nm_tys)]
+                    else Kt.BlockBody $ [ExpressionStmt $ 
+                                                    CallExpr (IdentifierExpr (refTypeName ret_kt_ty ++ "Proxy")) []  
+                                                    [(CallExpr (IdentifierExpr "callMethod")
+                                                    [RefType "ArkObjectSafeReference"]
+                                                    (LiteralString name : 
+                                                        map (\(param_nm, kt_ty) -> 
+                                                        if Kt.isPrimType kt_ty
+                                                            then IdentifierExpr param_nm
+                                                            else MemberExpr (IdentifierExpr param_nm) "ref") 
+                                                        para_kt_nm_tys
                                                     
+                                                    ))]]
+        _ -> error $ "Only Method function type is supported in function body generation"
+
+constructParam :: (String, Ts.Type) -> (String, String) -> Kt.Parameter
+constructParam (name, _) (_, kt_ty) = 
+    let parsed_kt_ty = pKtType kt_ty in
+    Kt.Parameter
+        { Kt.parameterName = name
+        , Kt.parameterType = parsed_kt_ty
+        , parameterDefaultValue = Nothing
+        , parameterModifiers = []
+        }
+
 convertParameter :: [Decorator] -> (String, Type) -> Kt.Parameter
 convertParameter ds (name, ty) =
     Kt.Parameter
@@ -85,7 +141,6 @@ convertType d (TyArray ty) = ArrayType (convertType d ty)
 convertType d (TyNullable ty) = NullableType (convertType d ty)
 convertType d ty = error $ show d ++ " " ++ show ty ++ "not implemented"
 
-
 defaultType :: Ts.Type -> Kt.KotlinType
 defaultType (TyRef "number") = RefType "Double"
 defaultType (TyRef "string") = RefType "String"
@@ -94,11 +149,16 @@ defaultType (TyRef "any") = RefType "Any"
 defaultType (TyNullable ty) = NullableType (defaultType ty)
 defaultType ty = error $ "Unsupported default type for " ++ show ty
 
+findDecorator :: String -> [Decorator] -> Maybe Decorator
+findDecorator name decos =
+    L.find (\d -> case d of
+                    Decorator n -> n == name
+                    DecoratorPara n _ -> n == name
+                    _ -> False) decos
+
 convertVar :: Ts.VarD -> Kt.Property
 convertVar (VarD decos n ty) =
-    let deco_ty = L.find (\d -> case d of
-                                DecoratorPara name _ -> name == "KotlinExportField"
-                                _ -> False) (trace (show decos) decos)
+    let deco_ty = findDecorator "KotlinExportField" decos
         kt_ty = case deco_ty of
                     Just (DecoratorPara _ p) -> case L.lookup "type" p of
                                                     Just t -> pKtType t
