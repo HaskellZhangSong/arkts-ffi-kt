@@ -14,6 +14,7 @@ import qualified Data.ByteString.Lazy as BS
 import Text.Pretty.Simple
 import Generator
 import Prettyprinter
+import Generator (convertSourceFile)
 
 data CmdOptions = CmdOptions {
     inputFile :: FilePath,
@@ -26,7 +27,7 @@ main = do
     opts <- cmdArgs mode
     input <- BS.readFile (inputFile opts)
     let ts_node = decode input :: Maybe TsNode
-    SourceFile ast <- case ts_node of
+    ast <- case ts_node of
         Nothing -> error "Failed to parse input JSON."
         Just ts -> do
             let parseResult =  par pSourceFile [ts]
@@ -34,9 +35,9 @@ main = do
                 Right ts_ast -> return ts_ast
                 Left err -> error $ "Parsing failed" ++ show err
                 
-    let kt_asts = map convertDecl ast
+    let kt_asts = convertSourceFile ast
     pPrint kt_asts
-    let res = vsep $ map pretty kt_asts
+    let res = pretty kt_asts
     writeFile (outputFile opts) (show res)
     where
         mode = CmdOptions {

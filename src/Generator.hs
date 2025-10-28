@@ -13,6 +13,14 @@ import Language.Kotlin.AST
 import qualified Language.TypeScript.AST as Ts
 import Control.Exception (Deadlock)
 
+convertSourceFile :: SourceFile -> Kt.KotlinFile
+convertSourceFile (SourceFile decls) =
+    Kt.KotlinFile
+        { Kt.packageDecl = ["arkts", "ffi"]
+        , Kt.imports = []
+        , Kt.declarations = map convertDecl decls
+        }
+
 convertDecl :: Decl -> Kt.KotlinDeclaration
 convertDecl (Ts.FuncDecl f) = Kt.FunctionDecl $ convertFunc f
 convertDecl (Ts.VarDecl v) = Kt.PropertyDecl $ convertVar v

@@ -5,7 +5,7 @@ import Prettyprinter
 import Data.List (intercalate)
 -- | Main Kotlin compilation unit
 data KotlinFile = KotlinFile 
-  { packageDecl :: Maybe String
+  { packageDecl :: [String]
   , imports :: [Import]
   , declarations :: [KotlinDeclaration]
   } deriving (Eq, Show)
@@ -212,15 +212,11 @@ data Statement
 
 instance Pretty KotlinFile where
   pretty (KotlinFile pkg imps decls) = 
-    vsep $ catMaybes $
-      [ fmap (\p -> "package" <+> pretty p <> line) pkg
-      , if null imps then Nothing else Just (vsep (map pretty imps) <> line)
-      , if null decls then Nothing else Just (vsep $ punctuate (line <> line) $ map pretty decls)
+    vsep $
+      [ "package" <+> hcat (punctuate "." (map pretty pkg))
+      , (vsep (map pretty imps))
+      , (vsep $ punctuate line $ map pretty decls)
       ]
-    where
-      catMaybes [] = []
-      catMaybes (Nothing : xs) = catMaybes xs
-      catMaybes (Just x : xs) = x : catMaybes xs
 
 instance Pretty Import where
   pretty (Import path alias) = 
