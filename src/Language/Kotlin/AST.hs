@@ -3,6 +3,9 @@ module Language.Kotlin.AST where
 
 import Prettyprinter
 import Data.List (intercalate)
+import Language.TypeScript.AST (isPrimType)
+import Data.Derive.IsDataCon
+
 -- | Main Kotlin compilation unit
 data KotlinFile = KotlinFile 
   { packageDecl :: [String]
@@ -40,6 +43,7 @@ data Class = Class
   { className :: String
   , classModifiers :: [Modifier]
   , typeParameters :: [TypeParameter]
+  , fieldParameters :: [Parameter]
   , superTypes :: [KotlinType]
   , primaryConstructor :: Maybe Constructor
   , classBody :: [ClassMember]
@@ -146,13 +150,26 @@ data TypeParameter = TypeParameter
 
 -- | Kotlin type system
 data KotlinType
-  = RefType String                          -- Int, String, etc.
+  = RefType { refTypeName :: String }                          -- Int, String, etc.
   | GenericType String [KotlinType]           -- List<String>
   | NullableType KotlinType                   -- String?
   | FunctionType [KotlinType] KotlinType      -- (Int, String) -> Boolean
   | TupleType [KotlinType]                    -- (T1, T2,...)
   | QualifiedType [String] KotlinType         -- QualifiedName
+  | ArrayType KotlinType                     -- Array<Type>
   deriving (Eq, Show)
+
+isPrimType :: KotlinType -> Bool
+isPrimType (RefType "Char") = True
+isPrimType (RefType "Byte") = True
+isPrimType (RefType "Short") = True
+isPrimType (RefType "Int") = True
+isPrimType (RefType "Long") = True
+isPrimType (RefType "Float") = True
+isPrimType (RefType "Double") = True
+isPrimType (RefType "String") = True
+isPrimType (RefType "Boolean") = True
+isPrimType _ = False
 
 -- | Modifiers
 data Modifier
@@ -232,10 +249,13 @@ instance Pretty KotlinDeclaration where
   pretty (EnumDecl enum) = pretty enum
 
 instance Pretty Class where
-  pretty (Class name mods tyParams supers ctor body) =
+  pretty (Class name mods tyParams fdParams supers ctor body) =
     (if null mods then "" else hsep (map pretty mods) <+> "") <>
     "class" <+> pretty name <>
     prettyTypeParams tyParams <>
+    (if null fdParams 
+        then mempty 
+        else parens (hsep $ punctuate comma $ map pretty fdParams)) <>
     maybe mempty pretty ctor <>
     prettySuperTypes supers <+>
     prettyClassBody body
@@ -342,6 +362,7 @@ instance Pretty KotlinType where
   pretty (TupleType types) = 
     parens (hsep $ punctuate comma $ map pretty types)
   pretty (QualifiedType ns ty) = pretty (intercalate "." ns) <> "." <> pretty ty
+  pretty (ArrayType ty) = "Array<" <> pretty ty <> ">"
 
 
 instance Pretty Modifier where
@@ -393,8 +414,12 @@ instance Pretty Expression where
   pretty (LiteralString lit) = dquotes $ pretty lit
   pretty (IdentifierExpr name) = pretty name
   pretty (CallExpr func ty args) = pretty func <>
-                                      if null ty then mempty else "<" <> hsep (punctuate comma $ map pretty ty) <> ">" <>
-                                      parens (hsep $ punctuate comma $ map pretty args)
+                                      (if null ty
+                                          then mempty 
+                                          else "<" <> 
+                                            hsep (punctuate comma $ map pretty ty) <> 
+                                            ">") <> 
+                                            parens (hsep $ punctuate comma $ map pretty args)
   pretty (MemberExpr obj member) = pretty obj <> "." <> pretty member
   pretty ThisExpr = "this"
   pretty SuperExpr = "super"

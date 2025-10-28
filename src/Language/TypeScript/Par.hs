@@ -21,7 +21,7 @@ pSourceFile = do
     -- ignore import declarations
     _ <- many (skipKind "ImportDeclaration")
     decs <- pDecls
-    pop -- pop Eof
+    _ <- pop -- pop Eof
     nodes <- get
     traceM $ "Remaining nodes after parsing SourceFile: " ++ show nodes
     return $ SourceFile decs
@@ -156,7 +156,10 @@ pType = do
         "StringKeyword" -> return $ TyRef "string"
         "BooleanKeyword" -> return $ TyRef "boolean"
         "ArrayType" -> return $ TyArray (TyRef "any")  -- TODO: parse element type
-        _ -> error $ "unknown type: " ++ show n
+        "TypeReference" -> do
+            let ident = fromJust $ content $ head $ fromJust $ children n
+            return $ TyRef ident
+        _ -> error $ "Unsupported type kind: " ++ show n
 
 pVarDecl :: Parser VarD
 pVarDecl = do

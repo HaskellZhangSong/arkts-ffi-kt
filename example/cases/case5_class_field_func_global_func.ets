@@ -1,11 +1,13 @@
 @KotlinExportClass
 @KotlinExportType(type = "Proxy", lang = "Kotlin")
 class Bar {
+  @KotlinExportField(type = "FooProxy")
+  obj : Foo
   @KotlinExportField(alias = "json_value", type = "Int")
   value : number
   
-  @KotlinExportFunction
-  bar(x: number): number {
+  @KotlinExportFunction(type = "Int", type = "Double", type = "FooProxy")
+  bar(x: number, y : number ,z : Foo): number {
     return x + 1
   }
 }

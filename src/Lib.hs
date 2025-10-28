@@ -12,14 +12,10 @@ import qualified Language.TypeScript.AST as TS
 import Data.Aeson
 import Data.Aeson.TH
 import Data.Maybe
-import Data.Generics.Schemes
 import Data.Data
-import Data.Generics.Aliases hiding (Generic)
 import GHC.Generics
-import Prettyprinter
 import Text.Pretty.Simple
 import System.IO.Unsafe
-import Data.Attoparsec.Combinator
 import qualified Data.ByteString.Lazy as BS
 -- example :: BS.ByteString
 example1 = unsafePerformIO $ BS.readFile "example/cases/case5_class_field_func_global_func.jsonn"

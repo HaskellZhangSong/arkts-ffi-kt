@@ -77,3 +77,9 @@ pFunctionType = do
     _ <- lexeme (string "->")
     retType <- pKotlinType
     return $ FunctionType paramTypes retType
+
+pKtType :: String -> KotlinType
+pKtType s = let remove_quote = filter (/= '\"') s
+            in case parse pKotlinType "" remove_quote of
+                Left err -> error $ "Failed to parse Kotlin type: " ++ show err ++ " " ++ show s
+                Right kt -> kt

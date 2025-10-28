@@ -34,7 +34,7 @@ main = do
             case parseResult of
                 Right ts_ast -> return ts_ast
                 Left err -> error $ "Parsing failed" ++ show err
-                
+    pPrint ast
     let kt_asts = convertSourceFile ast
     pPrint kt_asts
     let res = pretty kt_asts
