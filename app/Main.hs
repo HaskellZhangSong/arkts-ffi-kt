@@ -18,6 +18,7 @@ import Generator (convertSourceFile)
 import System.Process
 import System.Exit
 import System.Console.CmdArgs (opt)
+
 data CmdOptions = CmdOptions {
     inputFile :: FilePath,
     outputFile :: FilePath
@@ -47,7 +48,6 @@ main = do
             putStrLn "Error: 'tsp' command not found. Please install TypeScript Parser (tsp) to proceed."
             exitFailure
     a <- getArgs
-    putStrLn $ "arguments:" ++ show a
     opts <- cmdArgs $ modes [options]    
     -- use tsp to parse input file
     temp_file <- create_temp_file
@@ -56,22 +56,27 @@ main = do
         (ExitSuccess, _, _) -> return ()
         (ExitFailure code, err, _) -> do
             putStrLn $ "tsp failed: " ++ err
+            putStrLn $ "json output file: " ++ temp_file
             exitWith (ExitFailure code)
-    print tsp
     input <- BS.readFile temp_file
-    
-    print temp_file
     let ts_node = decode input :: Maybe TsNode
     ast <- case ts_node of
-        Nothing -> error "Failed to parse input JSON."
+        Nothing -> do
+            putStrLn $ "Failed to decode TypeScript AST from JSON for file: " ++ temp_file
+            exitFailure
         Just ts -> do
             let parseResult =  par pSourceFile [ts]
             case parseResult of
                 Right ts_ast -> return ts_ast
-                Left err -> error $ "Parsing failed" ++ show err
+                Left err -> do 
+                    putStrLn $ "Parsing failed" ++ show err
+                    putStrLn $ "Input JSON: " ++ show temp_file
+                    exitFailure
     -- pPrint ast
     let kt_asts = convertSourceFile ast
     -- pPrint kt_asts
     let res = pretty kt_asts
     writeFile (outputFile opts) (show res)
-   
+    -- remove json file
+    _ <- readProcess "rm" [temp_file] ""
+    return ()

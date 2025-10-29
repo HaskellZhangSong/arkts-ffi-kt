@@ -36,11 +36,8 @@ Installing executable arkts-ffi-kt-exe in /Users/songzh/project/haskell/arkts-ff
 
 ## Use
 
-先使用typescript-parser项目
-
 ```
-node index.js my_test.ets -o example2.json
-arkts-ffi-kt-exe -i example2.json -o test.kt
+arkts-ffi-kt-exe example2.ets -o test.kt
 ```
 
 For `example/cases/case5_class_field_func_global_func.ets`
