@@ -13,7 +13,7 @@ import Control.Monad.State
 import Control.Applicative
 import Language.TypeScript.ParserCombinators
 import Data.Attoparsec.Combinator
-
+import Text.Pretty.Simple
 pSourceFile :: Parser SourceFile
 pSourceFile = do
     pushKindChildren "SourceFile"
@@ -21,18 +21,19 @@ pSourceFile = do
     -- ignore import declarations
     _ <- many (skipKind "ImportDeclaration")
     decs <- pDecls
-    _ <- pop -- pop Eof
+    traceM $ "Parsed declarations: " ++ (show $ length decs)
+    -- _ <- pop -- pop Eof
+    skipKind "EndOfFileToken"
     nodes <- get
-    traceM $ "Remaining nodes after parsing SourceFile: " ++ show nodes
-    return $ SourceFile decs
+
+    return $ SourceFile $ decs
 
 pDecls :: Parser [Decl]
-pDecls = some pDecl
+pDecls = many pDecl
 
 pDecl :: Parser Decl
 pDecl = do
     n <- peek
-    -- traceM $ show "in pDecl: " ++ show n
     case kind n of
         "ClassDeclaration" -> do
             class_decl <- pClassDecl
@@ -53,10 +54,6 @@ pDecl = do
             constr_decl <- pConstrDecl
             return $ FuncDecl constr_decl
         _ -> do
-            s <- get
-            -- traceM $ "Unknown declaration kind: " ++ show n
-            -- traceM $ "Remaining nodes: " ++ show s
-            
             lift $ Left n
 
 pClassDecl :: Parser ClassD
@@ -76,7 +73,8 @@ pClassDecl = do
     class_body <- pKindNode "SyntaxList"
     class_members <- case children class_body of
                         Nothing -> return []
-                        Just class_members -> do 
+                        Just class_members -> do
+                                        
                                         push class_members
                                         mem_decls <- pDecls
                                         return mem_decls
@@ -102,7 +100,7 @@ pDecorator = do
             ident <- pKindContent "Identifier"
             eat "("
             pushKindChildren "SyntaxList"
-            params <- sepBy1 pDecoratorParam (eat ",")
+            params <- sepBy pDecoratorParam (eat ",")
             eat ")"
             return $ DecoratorPara ident params
 
@@ -197,14 +195,12 @@ pAbsFuncPart decos = do
 pMethodDecl :: Parser FuncD
 pMethodDecl = do
     pushKindChildren "MethodDeclaration"
-    has_decorator <- peekKind "SyntaxList"
     decos <- pDecorators
     pAbsFuncPart decos
 
 pFuncDecl :: Parser FuncD
 pFuncDecl = do
     pushKindChildren "FunctionDeclaration"
-    has_decorator <- peekKind "SyntaxList"
     decos <- pDecorators
     eat "function"
     pAbsFuncPart decos
