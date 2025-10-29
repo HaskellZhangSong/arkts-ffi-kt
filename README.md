@@ -2,8 +2,6 @@
 
 This project will generate kotlin Proxy code from arkts(typescript). You should parse your arkts or typescript code with [typescript-parser](https://github.com/HaskellZhangSong/typescript-parser), then use it as an input of this project.
 
-
-
 ## build
 
 1. 克隆这个项目：
@@ -43,4 +41,39 @@ Installing executable arkts-ffi-kt-exe in /Users/songzh/project/haskell/arkts-ff
 ```
 node index.js my_test.ets -o example2.json
 arkts-ffi-kt-exe -i example2.json -o test.kt
+```
+
+For `example/cases/case5_class_field_func_global_func.ets`
+
+```typescript
+@KotlinExportClass
+class Bar {
+  @KotlinExportField(type = "FooProxy")
+  obj : Foo
+  @KotlinExportField(type = "Int")
+  value : number
+  
+  @KotlinExportFunction(type = "Int", type = "Double", type = "FooProxy", type = "Double")
+  bar(x: number, y : number ,z : Foo): number {
+    return x + 1
+  }
+}
+```
+
+it will generate following kotlin code:
+
+```kotlin
+package arkts.ffi
+
+class BarProxy(ref: ArkObjectSaafeReference) {
+  var obj: FooProxy
+    get() = FooProxy(getProperty("obj"))
+    set(value) = setProperty("obj", value)
+  var value: Int
+    get() = getInt("value")
+    set(value) = setInt("value", value)
+  fun bar(x: Int, y: Double, z: FooProxy): Double {
+    callMethod<Double>("bar", x, y, z.ref)
+  }
+}
 ```
