@@ -15,17 +15,52 @@ import Text.Pretty.Simple
 import Generator
 import Prettyprinter
 import Generator (convertSourceFile)
-
+import System.Process
+import System.Exit
+import System.Console.CmdArgs (opt)
 data CmdOptions = CmdOptions {
     inputFile :: FilePath,
     outputFile :: FilePath
 } deriving (Show, Eq, Data, Typeable)
 
+options = CmdOptions {
+    inputFile = def &= args &= typ "FILES",
+    outputFile = def &= help "output file" &= typFile
+}
+
+create_temp_file :: IO FilePath
+create_temp_file = do
+    temp_file <- readCreateProcess (proc "mktemp" ["-t", "arkts-ffi.json"]) ""
+    return $ init $ temp_file -- drop \n at the end
+
+commandExists :: String -> IO Bool
+commandExists cmd = do
+  (exitCode, _, _) <- readProcessWithExitCode "which" [cmd] ""
+  return (exitCode == ExitSuccess)
+
 main :: IO ()
 main = do
+    exists <- commandExists "tsp"
+    case exists of
+        True -> return ()
+        False -> do
+            putStrLn "Error: 'tsp' command not found. Please install TypeScript Parser (tsp) to proceed."
+            exitFailure
     a <- getArgs
-    opts <- cmdArgs mode
-    input <- BS.readFile (inputFile opts)
+    putStrLn $ "arguments:" ++ show a
+    opts <- cmdArgs $ modes [options]    
+    -- use tsp to parse input file
+    temp_file <- create_temp_file
+    tsp <- readProcessWithExitCode "tsp" [(inputFile opts), "-o", temp_file] ""
+    case tsp of
+        (ExitSuccess, _, _) -> return ()
+        (ExitFailure code, err, _) -> do
+            putStrLn $ "tsp failed: " ++ err
+            exitWith (ExitFailure code)
+    print tsp
+    input <- BS.readFile temp_file
+    
+    print temp_file
     let ts_node = decode input :: Maybe TsNode
     ast <- case ts_node of
         Nothing -> error "Failed to parse input JSON."
@@ -34,13 +69,9 @@ main = do
             case parseResult of
                 Right ts_ast -> return ts_ast
                 Left err -> error $ "Parsing failed" ++ show err
-    pPrint ast
+    -- pPrint ast
     let kt_asts = convertSourceFile ast
-    pPrint kt_asts
+    -- pPrint kt_asts
     let res = pretty kt_asts
     writeFile (outputFile opts) (show res)
-    where
-        mode = CmdOptions {
-            inputFile = def &= help "input file" &= typFile,
-            outputFile = def &= help "output file" &= typFile
-        }
+   
