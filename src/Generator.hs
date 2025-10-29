@@ -131,7 +131,7 @@ convertParameter ds (name, ty) =
 convertType :: [Decorator] -> Ts.Type -> Kt.KotlinType
 convertType [DecoratorPara n p] (TyRef name) = case L.lookup "type" p of
                                                 Nothing -> RefType name
-                                                Just t -> pKtType (trace (show t) t)
+                                                Just t -> pKtType t
 
 convertType _ (TyRef "number") = RefType "Double"
 convertType _ (TyRef "string") = RefType "String"
@@ -146,6 +146,7 @@ defaultType (TyRef "number") = RefType "Double"
 defaultType (TyRef "string") = RefType "String"
 defaultType (TyRef "boolean") = RefType "Boolean"
 defaultType (TyRef "any") = RefType "Any"
+defaultType (TyRef ref) = RefType $ ref ++ "Proxy"
 defaultType (TyNullable ty) = NullableType (defaultType ty)
 defaultType ty = error $ "Unsupported default type for " ++ show ty
 
