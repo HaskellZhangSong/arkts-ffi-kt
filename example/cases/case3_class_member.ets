@@ -1,9 +1,9 @@
-@KotlinExportClass
+@ExportKotlinClass
 class Bar {
-  @KotlinExportField(alias = "json_value", type = "Int")
+  @ExportKotlinField(alias = "json_value", type = "Int")
   value : number
 
-  @KotlinExportField
+  @ExportKotlinField
   strField : string
 
 }

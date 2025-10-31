@@ -1,9 +1,9 @@
-@KotlinExportClass
+@ExportKotlinClass
 class Bar {
 
 }
 
-@KotlinExportClass
+@ExportKotlinClass
 class Foo {
 
 }

@@ -47,7 +47,7 @@
                         "line": 1,
                         "column": 2
                       },
-                      "content": "KotlinExportClass"
+                      "content": "ExportKotlinClass"
                     }
                   ]
                 },
@@ -259,7 +259,7 @@
                                     "line": 4,
                                     "column": 4
                                   },
-                                  "content": "KotlinExportField"
+                                  "content": "ExportKotlinField"
                                 },
                                 {
                                   "kind": "OpenParenToken",
@@ -427,7 +427,7 @@
                                 "line": 7,
                                 "column": 4
                               },
-                              "content": "KotlinExportFunction"
+                              "content": "ExportKotlinFunction"
                             }
                           ]
                         }

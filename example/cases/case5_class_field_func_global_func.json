@@ -47,7 +47,7 @@
                         "line": 1,
                         "column": 2
                       },
-                      "content": "KotlinExportClass"
+                      "content": "ExportKotlinClass"
                     }
                   ]
                 }
@@ -126,7 +126,7 @@
                                     "line": 3,
                                     "column": 4
                                   },
-                                  "content": "KotlinExportField"
+                                  "content": "ExportKotlinField"
                                 },
                                 {
                                   "kind": "OpenParenToken",
@@ -269,7 +269,7 @@
                                     "line": 5,
                                     "column": 4
                                   },
-                                  "content": "KotlinExportField"
+                                  "content": "ExportKotlinField"
                                 },
                                 {
                                   "kind": "OpenParenToken",
@@ -315,7 +315,7 @@
                                             "line": 5,
                                             "column": 29
                                           },
-                                          "content": "\"Int\""
+                                          "content": "\"Double\""
                                         }
                                       ]
                                     }
@@ -325,7 +325,7 @@
                                   "kind": "CloseParenToken",
                                   "pos": {
                                     "line": 5,
-                                    "column": 34
+                                    "column": 37
                                   },
                                   "content": ")"
                                 }
@@ -403,7 +403,7 @@
                                     "line": 8,
                                     "column": 4
                                   },
-                                  "content": "KotlinExportFunction"
+                                  "content": "ExportKotlinFunction"
                                 },
                                 {
                                   "kind": "OpenParenToken",
@@ -862,315 +862,14 @@
               "content": "}"
             }
           ]
-        },
-        {
-          "kind": "FunctionDeclaration",
-          "pos": {
-            "line": 14,
-            "column": 1
-          },
-          "children": [
-            {
-              "kind": "SyntaxList",
-              "pos": {
-                "line": 14,
-                "column": 1
-              },
-              "children": [
-                {
-                  "kind": "Decorator",
-                  "pos": {
-                    "line": 14,
-                    "column": 1
-                  },
-                  "children": [
-                    {
-                      "kind": "AtToken",
-                      "pos": {
-                        "line": 14,
-                        "column": 1
-                      },
-                      "content": "@"
-                    },
-                    {
-                      "kind": "CallExpression",
-                      "pos": {
-                        "line": 14,
-                        "column": 2
-                      },
-                      "children": [
-                        {
-                          "kind": "Identifier",
-                          "pos": {
-                            "line": 14,
-                            "column": 2
-                          },
-                          "content": "KotlinExportFunction"
-                        },
-                        {
-                          "kind": "OpenParenToken",
-                          "pos": {
-                            "line": 14,
-                            "column": 22
-                          },
-                          "content": "("
-                        },
-                        {
-                          "kind": "SyntaxList",
-                          "pos": {
-                            "line": 14,
-                            "column": 23
-                          },
-                          "children": [
-                            {
-                              "kind": "BinaryExpression",
-                              "pos": {
-                                "line": 14,
-                                "column": 23
-                              },
-                              "children": [
-                                {
-                                  "kind": "Identifier",
-                                  "pos": {
-                                    "line": 14,
-                                    "column": 23
-                                  },
-                                  "content": "type"
-                                },
-                                {
-                                  "kind": "FirstAssignment",
-                                  "pos": {
-                                    "line": 14,
-                                    "column": 28
-                                  },
-                                  "content": "="
-                                },
-                                {
-                                  "kind": "StringLiteral",
-                                  "pos": {
-                                    "line": 14,
-                                    "column": 30
-                                  },
-                                  "content": "\"abc\""
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "kind": "CloseParenToken",
-                          "pos": {
-                            "line": 14,
-                            "column": 35
-                          },
-                          "content": ")"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "kind": "FunctionKeyword",
-              "pos": {
-                "line": 15,
-                "column": 1
-              },
-              "content": "function"
-            },
-            {
-              "kind": "Identifier",
-              "pos": {
-                "line": 15,
-                "column": 10
-              },
-              "content": "global_foo"
-            },
-            {
-              "kind": "OpenParenToken",
-              "pos": {
-                "line": 15,
-                "column": 20
-              },
-              "content": "("
-            },
-            {
-              "kind": "SyntaxList",
-              "pos": {
-                "line": 15,
-                "column": 21
-              },
-              "children": [
-                {
-                  "kind": "Parameter",
-                  "pos": {
-                    "line": 15,
-                    "column": 21
-                  },
-                  "children": [
-                    {
-                      "kind": "Identifier",
-                      "pos": {
-                        "line": 15,
-                        "column": 21
-                      },
-                      "content": "x"
-                    },
-                    {
-                      "kind": "ColonToken",
-                      "pos": {
-                        "line": 15,
-                        "column": 22
-                      },
-                      "content": ":"
-                    },
-                    {
-                      "kind": "NumberKeyword",
-                      "pos": {
-                        "line": 15,
-                        "column": 24
-                      },
-                      "content": "number"
-                    }
-                  ]
-                },
-                {
-                  "kind": "CommaToken",
-                  "pos": {
-                    "line": 15,
-                    "column": 30
-                  },
-                  "content": ","
-                },
-                {
-                  "kind": "Parameter",
-                  "pos": {
-                    "line": 15,
-                    "column": 32
-                  },
-                  "children": [
-                    {
-                      "kind": "Identifier",
-                      "pos": {
-                        "line": 15,
-                        "column": 32
-                      },
-                      "content": "y"
-                    },
-                    {
-                      "kind": "ColonToken",
-                      "pos": {
-                        "line": 15,
-                        "column": 33
-                      },
-                      "content": ":"
-                    },
-                    {
-                      "kind": "StringKeyword",
-                      "pos": {
-                        "line": 15,
-                        "column": 35
-                      },
-                      "content": "string"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "kind": "CloseParenToken",
-              "pos": {
-                "line": 15,
-                "column": 41
-              },
-              "content": ")"
-            },
-            {
-              "kind": "Block",
-              "pos": {
-                "line": 15,
-                "column": 43
-              },
-              "children": [
-                {
-                  "kind": "FirstPunctuation",
-                  "pos": {
-                    "line": 15,
-                    "column": 43
-                  },
-                  "content": "{"
-                },
-                {
-                  "kind": "SyntaxList",
-                  "pos": {
-                    "line": 16,
-                    "column": 3
-                  },
-                  "children": [
-                    {
-                      "kind": "ExpressionStatement",
-                      "pos": {
-                        "line": 16,
-                        "column": 3
-                      },
-                      "children": [
-                        {
-                          "kind": "Identifier",
-                          "pos": {
-                            "line": 16,
-                            "column": 3
-                          },
-                          "content": "bala"
-                        }
-                      ]
-                    },
-                    {
-                      "kind": "ReturnStatement",
-                      "pos": {
-                        "line": 17,
-                        "column": 3
-                      },
-                      "children": [
-                        {
-                          "kind": "ReturnKeyword",
-                          "pos": {
-                            "line": 17,
-                            "column": 3
-                          },
-                          "content": "return"
-                        },
-                        {
-                          "kind": "FirstLiteralToken",
-                          "pos": {
-                            "line": 17,
-                            "column": 10
-                          },
-                          "content": "10"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "kind": "CloseBraceToken",
-                  "pos": {
-                    "line": 18,
-                    "column": 1
-                  },
-                  "content": "}"
-                }
-              ]
-            }
-          ]
         }
       ]
     },
     {
       "kind": "EndOfFileToken",
       "pos": {
-        "line": 18,
-        "column": 2
+        "line": 13,
+        "column": 1
       },
       "content": ""
     }

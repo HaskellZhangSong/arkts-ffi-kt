@@ -11,12 +11,19 @@ import qualified Data.List as L (lookup, find)
 import Data.Maybe (fromJust)
 import Debug.Trace
 
+-- Should check if decorator is corectly
+hasDecorator :: Decl -> Bool
+hasDecorator (Ts.FuncDecl (Ts.FuncD _ _ [] _ _)) = False
+hasDecorator (Ts.VarDecl (Ts.VarD [] _ _)) = False
+hasDecorator (Ts.ClassDecl (Ts.ClassD [] _ _ _)) = False
+hasDecorator _ = True
+
 convertSourceFile :: SourceFile -> Kt.KotlinFile
 convertSourceFile (SourceFile decls) =
     Kt.KotlinFile
         { Kt.packageDecl = ["arkts", "ffi"]
         , Kt.imports = []
-        , Kt.declarations = map convertDecl decls
+        , Kt.declarations = map convertDecl (filter hasDecorator decls)
         }
 
 convertDecl :: Decl -> Kt.KotlinDeclaration
@@ -44,11 +51,11 @@ convertClass (ClassD decos name superclasses members) =
 
 convertFunc :: FuncD -> Kt.Function
 convertFunc f@(FuncD _ name decos params ret_ty) =
-    let deco_fun = findDecorator "KotlinExportFunction" decos
+    let deco_fun = findDecorator "ExportKotlinFunction" decos
         in case deco_fun of
             Just (DecoratorPara _ ps) -> 
                 if length ps /= length params + 1
-                    then error $ "KotlinExportFunction decorator parameter length "
+                    then error $ "ExportKotlinFunction decorator parameter length "
                                  ++ show (length ps)
                                  ++ " does not match function parameter + return type length "
                                  ++ show (length params)
@@ -71,11 +78,11 @@ convertFunc f@(FuncD _ name decos params ret_ty) =
                 , Kt.functionReturnType = Just $ defaultType ret_ty
                 , Kt.functionBody = Just $ convertFunctionBody f
                 }
-            _ -> error $ "KotlinExportFunction decorator missing parameters"
+            _ -> error $ "ExportKotlinFunction decorator missing parameters"
 
 convertFunctionBody :: FuncD -> Kt.FunctionBody
 convertFunctionBody (FuncD fun_ty name decos params ret_ty) =
-    let deco_ret_kt_ty = findDecorator "KotlinExportFunction" decos
+    let deco_ret_kt_ty = findDecorator "ExportKotlinFunction" decos
         para_kt_nm_tys = case deco_ret_kt_ty of
                             Just (DecoratorPara _ ps) -> map (\((_, deco_t), (n, _)) -> (n, pKtType deco_t)) (zip (init ps) params)
                             _ -> map (\(n,t) -> (n, defaultType t)) params
@@ -104,10 +111,14 @@ convertFunctionBody (FuncD fun_ty name decos params ret_ty) =
                                                         if Kt.isPrimType kt_ty
                                                             then IdentifierExpr param_nm
                                                             else MemberExpr (IdentifierExpr param_nm) "ref") 
-                                                        para_kt_nm_tys
-                                                    
-                                                    ))]]
+                                                        para_kt_nm_tys))]]
         _ -> error $ "Only Method function type is supported in function body generation"
+
+convertGlobalFunc :: FuncD -> Kt.Function
+convertGlobalFunc f@(FuncD Func name decos params ret_ty) = 
+    let deco_fun = findDecorator "ExportKotlinFunction" decos
+        in 
+convertGlobalFunc _ = error $ "Only Func function type is supported in global function generation"
 
 constructParam :: (String, Ts.Type) -> (String, String) -> Kt.Parameter
 constructParam (name, _) (_, kt_ty) = 
@@ -159,11 +170,11 @@ findDecorator name decos =
 
 convertVar :: Ts.VarD -> Kt.Property
 convertVar (VarD decos n ty) =
-    let deco_ty = findDecorator "KotlinExportField" decos
+    let deco_ty = findDecorator "ExportKotlinField" decos
         kt_ty = case deco_ty of
                     Just (DecoratorPara _ p) -> case L.lookup "type" p of
                                                     Just t -> pKtType t
-                                                    Nothing -> error $ "KotlinExportField " ++
+                                                    Nothing -> error $ "ExportKotlinField " ++
                                                                     show p ++ 
                                                                     " missing type parameter"
                     _ -> defaultType ty

@@ -43,14 +43,14 @@ arkts-ffi-kt-exe example2.ets -o test.kt
 For `example/cases/case5_class_field_func_global_func.ets`
 
 ```typescript
-@KotlinExportClass
+@ExportKotlinClass
 class Bar {
-  @KotlinExportField(type = "FooProxy")
+  @ExportKotlinField(type = "FooProxy")
   obj : Foo
-  @KotlinExportField(type = "Int")
+  @ExportKotlinField(type = "Int")
   value : number
   
-  @KotlinExportFunction(type = "Int", type = "Double", type = "FooProxy", type = "Double")
+  @ExportKotlinFunction(type = "Int", type = "Double", type = "FooProxy", type = "Double")
   bar(x: number, y : number ,z : Foo): number {
     return x + 1
   }

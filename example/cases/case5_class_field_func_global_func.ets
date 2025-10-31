@@ -1,18 +1,12 @@
-@KotlinExportClass
+@ExportKotlinClass
 class Bar {
-  @KotlinExportField(type = "FooProxy")
+  @ExportKotlinField(type = "FooProxy")
   obj : Foo
-  @KotlinExportField(type = "Int")
+  @ExportKotlinField(type = "Double")
   value : number
   
-  @KotlinExportFunction(type = "Int", type = "Double", type = "FooProxy", type = "Double")
+  @ExportKotlinFunction(type = "Int", type = "Double", type = "FooProxy", type = "Double")
   bar(x: number, y : number ,z : Foo): number {
     return x + 1
   }
-}
-
-@KotlinExportFunction(type = "abc")
-function global_foo(x: number, y: string) {
-  bala
-  return 10
 }

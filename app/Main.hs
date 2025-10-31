@@ -14,11 +14,10 @@ import Language.Kotlin.AST
 import qualified Data.ByteString.Lazy as BS
 import Text.Pretty.Simple
 import Generator
-import Prettyprinter
-import Generator (convertSourceFile)
-import System.Process
+import Prettyprinter 
 import System.Exit
-import System.Console.CmdArgs (opt)
+import System.FilePath
+import System.Process
 import Data.List
 data CmdOptions = CmdOptions {
     input_file :: FilePath,

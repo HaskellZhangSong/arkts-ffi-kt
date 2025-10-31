@@ -135,7 +135,9 @@ pConstrDecl = do
         funcType = Constr,
         funcName = "constructor",
         funcDecorators = [],
-        funcParams = params
+        funcParams = params ,
+        -- Not useful, just dummy
+        funcReturnType = TyRef "Unit"
     }
 
 pFuncParam :: Parser (String, Type)
@@ -174,8 +176,8 @@ pVarDecl = do
         varDecorators = decos
     }
 
-pAbsFuncPart :: [Decorator] -> Parser FuncD
-pAbsFuncPart decos = do
+pAbsFuncPart :: FuncType -> [Decorator] -> Parser FuncD
+pAbsFuncPart ft decos = do
     ident <- pKindContent "Identifier"
     eat "("
     pushKindChildren "SyntaxList"
@@ -185,7 +187,7 @@ pAbsFuncPart decos = do
     ret_type <- pType
     skipKind "Block"
     return $ FuncD {
-        funcType = Method,
+        funcType = ft,
         funcName = ident,
         funcDecorators = decos,
         funcParams = params,
@@ -196,13 +198,13 @@ pMethodDecl :: Parser FuncD
 pMethodDecl = do
     pushKindChildren "MethodDeclaration"
     decos <- pDecorators
-    pAbsFuncPart decos
+    pAbsFuncPart Method decos
 
 pFuncDecl :: Parser FuncD
 pFuncDecl = do
     pushKindChildren "FunctionDeclaration"
     decos <- pDecorators
     eat "function"
-    pAbsFuncPart decos
+    pAbsFuncPart Func decos
 
 pInterfaceDecl = undefined

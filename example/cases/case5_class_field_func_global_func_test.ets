@@ -1,0 +1,3 @@
+class Bar {
+  obj : Foo
+}

@@ -18,7 +18,7 @@ import Text.Pretty.Simple
 import System.IO.Unsafe
 import qualified Data.ByteString.Lazy as BS
 -- example :: BS.ByteString
-example1 = unsafePerformIO $ BS.readFile "example/cases/case5_class_field_func_global_func.jsonn"
+example1 = unsafePerformIO $ BS.readFile "example/cases/case5_class_field_func_global_func.json"
 
 data Loc = Loc {
     line   :: Int,

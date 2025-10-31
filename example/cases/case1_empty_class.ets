@@ -1,4 +1,4 @@
-@KotlinExportClass
+@ExportKotlinClass
 class Bar {
 
 }
