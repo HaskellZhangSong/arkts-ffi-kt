@@ -82,7 +82,7 @@ get_ts_node opts json_file = do
 
 compile_to_ts :: CmdOptions -> FilePath -> TsNode -> IO SourceFile
 compile_to_ts opts json_file ts_node = do
-            let parseResult =  par pSourceFile [ts]
+            let parseResult =  par pSourceFile [ts_node]
             case parseResult of
                 Right ts_ast -> do
                     when (dump_ts_ast opts) $ do
