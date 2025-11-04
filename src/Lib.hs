@@ -14,12 +14,6 @@ import Data.Aeson.TH
 import Data.Maybe
 import Data.Data
 import GHC.Generics
-import Text.Pretty.Simple
-import System.IO.Unsafe
-import qualified Data.ByteString.Lazy as BS
--- example :: BS.ByteString
-example1 = unsafePerformIO $ BS.readFile "example/cases/case5_class_field_func_global_func.json"
-
 data Loc = Loc {
     line   :: Int,
     column :: Int
@@ -36,10 +30,3 @@ data TsNode = TsNode {
 } deriving (Show, Eq, Ord, Data, Generic)
 
 deriveJSON defaultOptions ''TsNode
-
-ts = fromJust (decode example1 :: Maybe TsNode)
-
-foo :: IO ()
-foo = do 
-    let Just ts = decode example1 :: Maybe TsNode
-    pPrint ts

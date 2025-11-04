@@ -14,18 +14,17 @@ import Control.Applicative
 import Language.TypeScript.ParserCombinators
 import Data.Attoparsec.Combinator
 import Text.Pretty.Simple
+import qualified Data.ByteString.Lazy as BS
+import Data.Aeson
+
 pSourceFile :: Parser SourceFile
 pSourceFile = do
     pushKindChildren "SourceFile"
     pushKindChildren "SyntaxList"
     -- ignore import declarations
-    _ <- many (skipKind "ImportDeclaration")
+    -- _ <- many (skipKind "ImportDeclaration")
     decs <- pDecls
-    traceM $ "Parsed declarations: " ++ (show $ length decs)
-    -- _ <- pop -- pop Eof
     skipKind "EndOfFileToken"
-    nodes <- get
-
     return $ SourceFile $ decs
 
 pDecls :: Parser [Decl]
@@ -208,3 +207,14 @@ pFuncDecl = do
     pAbsFuncPart Func decos
 
 pInterfaceDecl = undefined
+
+parJson :: BS.ByteString -> Either TsNode SourceFile
+parJson input =
+    case decode input :: Maybe TsNode of
+        Nothing -> Left (error "Failed to decode TypeScript AST from JSON")
+        Just ts -> par pSourceFile [ts]
+
+parJsonFile :: FilePath -> IO (Either TsNode SourceFile)
+parJsonFile json_file = do
+    input <- BS.readFile json_file
+    return $ parJson input

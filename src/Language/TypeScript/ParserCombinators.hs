@@ -72,14 +72,14 @@ pChildren = StateT $ \nodes -> case nodes of
     [] -> Left (error "no more nodes")
     (n:res) -> case children n of
                     Just ch -> Right (ch, res)
-                    Nothing -> Left n
+                    Nothing -> error $ "Expected children, but got: " ++ show n
 
 pKindChildren :: String -> Parser [TsNode]
 pKindChildren s = do
     n <- pKindNode s
     case children n of
         Just ch -> return ch
-        Nothing -> lift $ Left (error $ "Expected children for kind: " ++ s ++ ", but got: " ++ show n)
+        Nothing -> error $ "Expected children for kind: " ++ s ++ ", but got: " ++ show n
 
 pushKindChildren :: String -> Parser ()
 pushKindChildren s = do

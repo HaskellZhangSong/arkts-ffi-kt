@@ -5,6 +5,7 @@ import Prettyprinter
 import Data.List (intercalate)
 import Language.TypeScript.AST (isPrimType)
 import Data.Derive.IsDataCon
+import Text.Parsec.Expr (Operator(Postfix))
 
 -- | Main Kotlin compilation unit
 data KotlinFile = KotlinFile 
@@ -208,12 +209,16 @@ data PropertyAccessor = PropertyAccessor
   , accessorBody :: Maybe FunctionBody
   } deriving (Eq, Show)
 
+data Op = BangBang
+        | QuestionMark
+        deriving (Eq, Show)
 -- | Expressions (simplified for FFI generation)
 data Expression
   = LiteralString String
   | IdentifierExpr String
   | CallExpr Expression [KotlinType] [Expression]
   | MemberExpr Expression String
+  | OpPostfix Expression Op
   | ThisExpr
   | SuperExpr
   deriving (Eq, Show)
@@ -222,7 +227,7 @@ data Expression
 data Statement
   = ExpressionStmt Expression
   | ReturnStmt (Maybe Expression)
-  | AssignmentStmt String Expression
+  | AssignmentStmt ParameterModifier String Expression
   deriving (Eq, Show)
 
 -- Pretty Printer Instances
@@ -410,6 +415,9 @@ instance Pretty PropertyAccessor where
   pretty (PropertyAccessor mods body) =
     hsep (map pretty mods) <> maybe mempty pretty body
 
+instance Pretty Op where
+  pretty BangBang = "!!"
+  pretty QuestionMark = "?"
 instance Pretty Expression where
   pretty (LiteralString lit) = dquotes $ pretty lit
   pretty (IdentifierExpr name) = pretty name
@@ -421,6 +429,7 @@ instance Pretty Expression where
                                             ">") <> 
                                             parens (hsep $ punctuate comma $ map pretty args)
   pretty (MemberExpr obj member) = pretty obj <> "." <> pretty member
+  pretty (OpPostfix expr op) = pretty expr <> pretty op
   pretty ThisExpr = "this"
   pretty SuperExpr = "super"
 
@@ -428,7 +437,7 @@ instance Pretty Statement where
   pretty (ExpressionStmt expr) = pretty expr
   pretty (ReturnStmt Nothing) = "return"
   pretty (ReturnStmt (Just expr)) = "return" <+> pretty expr
-  pretty (AssignmentStmt var expr) = pretty var <+> "=" <+> pretty expr
+  pretty (AssignmentStmt mod var expr) = pretty mod <+> pretty var <+> "=" <+> pretty expr
 
 -- Helper functions for pretty printing
 
