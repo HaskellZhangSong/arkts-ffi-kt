@@ -45,7 +45,7 @@ convertClass (ClassD decos name superclasses members) =
         { Kt.className = name ++ "Proxy"
         , Kt.classModifiers = []
         , Kt.fieldParameters = [Parameter "ref"
-                    (RefType "ArkObjectSaafeReference")  Nothing []]
+                    (RefType "ArkObjectSafeReference")  Nothing []]
         , primaryConstructor = Nothing
         , superTypes = []
         , typeParameters = []
