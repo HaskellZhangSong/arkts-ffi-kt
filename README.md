@@ -50,7 +50,7 @@ class Bar {
   @ExportKotlinField(type = "Int")
   value : number
   
-  @ExportKotlinFunction(type = "Int", type = "Double", type = "FooProxy", type = "Double")
+  @ExportKotlinFunction(x = "Int", y = "Double", z = "FooProxy", return_ = "Double")
   bar(x: number, y : number ,z : Foo): number {
     return x + 1
   }
@@ -74,3 +74,5 @@ class BarProxy(ref: ArkObjectSaafeReference) {
   }
 }
 ```
+
+A default kotlin type will be used if variable type and function/method parameter type are not given in its annotation.
