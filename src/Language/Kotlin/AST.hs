@@ -271,7 +271,7 @@ instance Pretty Class where
 
 instance Pretty DataClass where
   pretty (DataClass name mods tyParams props) =
-    hsep (map pretty mods) <+>
+    (if null mods then "" else hsep (map pretty mods) <+> "") <+>
     "data class" <+> pretty name <>
     prettyTypeParams tyParams <>
     parens (hsep $ punctuate comma $ map prettyDataProperty props)
@@ -291,7 +291,7 @@ instance Pretty Interface where
 
 instance Pretty Object where
   pretty (Object name mods param supers members) =
-    hsep (map pretty mods) <+>
+    (if null mods then "" else hsep (map pretty mods) <+> "") <+>
     "object" <+> pretty name <>
     (if null param 
         then mempty 
@@ -303,7 +303,7 @@ instance Pretty Object where
 
 instance Pretty KotlinEnum where
   pretty (KotlinEnum name mods entries members) =
-    hsep (map pretty mods) <+>
+    (if null mods then "" else hsep (map pretty mods) <+> "") <+>
     "enum class" <+> pretty name <+> "{" <> line <>
     indent 2 (vsep $ punctuate comma $ map pretty entries) <>
     (if null members then mempty else ";" <> line <> indent 2 (vsep $ map pretty members)) <>
