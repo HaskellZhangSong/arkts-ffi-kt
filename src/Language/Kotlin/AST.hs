@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE InstanceSigs #-}
 module Language.Kotlin.AST where
 
 import Prettyprinter
@@ -305,7 +306,7 @@ instance Pretty Object where
     (if null annos 
         then mempty 
         else vsep (map pretty annos) <> line) <>
-    (if null mods then "" else hsep (map pretty mods) <+> "") <+>
+    (if null mods then mempty else hsep (map pretty mods) <+> mempty) <>
     "object" <+> pretty name <>
     (if null param 
         then mempty 
@@ -316,6 +317,7 @@ instance Pretty Object where
     prettyClassBody members
 
 instance Pretty KotlinEnum where
+  pretty :: KotlinEnum -> Doc ann
   pretty (KotlinEnum name mods entries members) =
     (if null mods then "" else hsep (map pretty mods) <+> "") <+>
     "enum class" <+> pretty name <+> "{" <> line <>
