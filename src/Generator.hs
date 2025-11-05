@@ -112,11 +112,21 @@ convertMethodBody f@(FuncD Method name decos params ret_ty) =
                                                     [common_method_expr]]
 convertMethodBody _ = error $ "Only Method function type is supported in method function body generation"
 
+getArkModulePath :: [Decorator] -> String
+getArkModulePath decos =
+    case findDecorator "ExportKotlinFunction" decos of
+        Just (DecoratorPara _ p) ->
+            case L.lookup "ark_module_path" p of
+                Just path -> path
+                Nothing -> "<no_module_path>"
+        _ -> "<no_module_path>"
+
 
 convertGlobalFuncBody :: FuncD -> Kt.FunctionBody
 convertGlobalFuncBody (FuncD Func name decos params ret_ty) =
-    let common_body = [
-                AssignmentStmt M_Val "mod" (CallExpr (IdentifierExpr "ArkModule")  [] [(LiteralString "entry/src")]),
+    let ark_module_path = getArkModulePath decos
+        common_body = [
+                AssignmentStmt M_Val "mod" (CallExpr (IdentifierExpr "ArkModule")  [] [(LiteralString ark_module_path)]),
                 AssignmentStmt M_Val "entry" (CallExpr (IdentifierExpr "ArkObjectSafeReference") []
                                                 [CallExpr (MemberExpr (IdentifierExpr "mod") "getNapiValue") [] []]),
                 AssignmentStmt M_Val "func" (CallExpr (MemberExpr (IdentifierExpr "entry") "get")  [] [LiteralString name])]
