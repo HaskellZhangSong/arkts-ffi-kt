@@ -38,7 +38,8 @@ convertClassMember (Ts.ClassDecl v) = error $ "Nested classes not supported" ++ 
 convertClass :: ClassD -> Kt.Class
 convertClass (ClassD decos name superclasses members) =
     Kt.Class
-        { Kt.className = name ++ "Proxy"
+        { Kt.classAnnotations = [Annotation "ArkTsExportedClass" ["curstomTransform = True"]]
+        , Kt.className = name ++ "Proxy"
         , Kt.classModifiers = []
         , Kt.classFieldParameters = [Parameter "ref"
                     (RefType "ArkObjectSafeReference")  Nothing []]
@@ -63,6 +64,8 @@ object BarProxyTransformer : ArkTsExportCustomTransformer<BarProxy> {
 -}
     let class_proxy_name = name ++ "Proxy"
         object = Kt.Object {
+            Kt.objectAnnotations = [Annotation "ArkTsExportCustomTransform" 
+                                        [class_proxy_name ++ "::class"]],
             Kt.objectName = class_proxy_name ++ "Transformer",
             Kt.objectModifiers = [],
             Kt.objectParameters = [],

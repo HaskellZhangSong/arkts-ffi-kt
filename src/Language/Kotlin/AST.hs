@@ -6,6 +6,7 @@ import Data.List (intercalate)
 import Language.TypeScript.AST (isPrimType)
 import Data.Derive.IsDataCon
 import Text.Parsec.Expr (Operator(Postfix))
+import Text.Pretty.Simple.Internal.Printer hiding (Annotation, Open)
 
 -- | Main Kotlin compilation unit
 data KotlinFile = KotlinFile 
@@ -32,6 +33,10 @@ data KotlinDeclaration
   | EnumDecl KotlinEnum
   deriving (Eq, Show)
 
+data Annotation = Annotation
+  { annotationName :: String
+  , annotationArgs :: [String]
+  } deriving (Eq, Show)
 data Var = Var
   { varModifier :: ParameterModifier
   , varName :: String
@@ -41,7 +46,8 @@ data Var = Var
 
 -- | Class declaration
 data Class = Class
-  { className :: String
+  { classAnnotations :: [Annotation]
+  , className :: String
   , classModifiers :: [Modifier]
   , classTypeParameters :: [TypeParameter]
   , classFieldParameters :: [Parameter]
@@ -69,7 +75,8 @@ data Interface = Interface
 
 -- | Object declaration (singleton)
 data Object = Object
-  { objectName :: String
+  { objectAnnotations :: [Annotation]
+  , objectName :: String
   , objectModifiers :: [Modifier]
   , objectParameters :: [Parameter]
   , objectSuperTypes :: [KotlinType]
@@ -254,9 +261,13 @@ instance Pretty KotlinDeclaration where
   pretty (ObjectDecl obj) = pretty obj
   pretty (DataClassDecl datacls) = pretty datacls
   pretty (EnumDecl enum) = pretty enum
+  pretty (VarDecl var) = pretty var
 
 instance Pretty Class where
-  pretty (Class name mods tyParams fdParams supers ctor body) =
+  pretty (Class anno name mods tyParams fdParams supers ctor body) =
+    (if null anno 
+        then mempty 
+        else vsep (map pretty anno) <> line) <>
     (if null mods then "" else hsep (map pretty mods) <+> "") <>
     "class" <+> pretty name <>
     prettyTypeParams tyParams <>
@@ -290,7 +301,10 @@ instance Pretty Interface where
     prettyInterfaceBody members
 
 instance Pretty Object where
-  pretty (Object name mods param supers members) =
+  pretty (Object annos name mods param supers members) =
+    (if null annos 
+        then mempty 
+        else vsep (map pretty annos) <> line) <>
     (if null mods then "" else hsep (map pretty mods) <+> "") <+>
     "object" <+> pretty name <>
     (if null param 
@@ -324,6 +338,12 @@ instance Pretty Function where
     parens (hsep $ punctuate comma $ map pretty params) <>
     maybe mempty (\t -> ": " <> pretty t) retType <>
     maybe mempty (\b -> pretty b) body
+
+instance Pretty Var where
+  pretty (Var mod_ name typ initializer) =
+    pretty mod_ <+> pretty name <>
+    maybe mempty (\t -> ": " <> pretty t) typ <>
+    maybe mempty (\i -> " = " <> pretty i) initializer
 
 instance Pretty Property where
   pretty (Property name mods propType initializer getter setter) =
@@ -409,6 +429,12 @@ instance Pretty ParameterModifier where
   pretty M_Var = "var"
   pretty M_Vararg = "vararg"
 
+instance Pretty Annotation where
+  pretty (Annotation name args) =
+    "@" <> pretty name <>
+    (if null args 
+        then mempty 
+        else parens (hsep $ punctuate comma $ map pretty args)) 
 instance Pretty Variance where
   pretty In = "in"
   pretty Out = "out"
