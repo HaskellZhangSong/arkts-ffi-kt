@@ -8,11 +8,6 @@ import Language.Kotlin.AST
 import Language.Kotlin.ParType
 import qualified Language.TypeScript.AST as Ts
 import qualified Data.List as L (lookup, find)
-import Data.Maybe (fromJust)
-import Debug.Trace
-import Text.Pretty.Simple (StringOutputStyle(Literal))
-import System.Console.CmdArgs.GetOpt (convert)
-import Data.Aeson.Types (parse)
 
 -- Should check if decorator is corectly
 hasDecorator :: Decl -> Bool
@@ -26,13 +21,14 @@ convertSourceFile (SourceFile decls) =
     Kt.KotlinFile
         { Kt.packageDecl = ["arkts", "ffi"]
         , Kt.imports = []
-        , Kt.declarations = map convertDecl (filter hasDecorator decls)
+        , Kt.declarations = concatMap convertDecl (filter hasDecorator decls)
         }
 
-convertDecl :: Decl -> Kt.KotlinDeclaration
-convertDecl (Ts.FuncDecl f) = Kt.FunctionDecl $ convertFunc f
-convertDecl (Ts.VarDecl v) = Kt.PropertyDecl $ convertVar v
-convertDecl (Ts.ClassDecl c) = Kt.ClassDecl $ convertClass c
+convertDecl :: Decl -> [Kt.KotlinDeclaration]
+convertDecl (Ts.FuncDecl f) = [Kt.FunctionDecl $ convertFunc f]
+convertDecl (Ts.VarDecl v) = [Kt.PropertyDecl $ convertVar v]
+convertDecl (Ts.ClassDecl c) = [Kt.ClassDecl $ convertClass c] ++
+                                [Kt.ObjectDecl $ generateProxyTransformer c]
 
 convertClassMember :: Decl -> Kt.ClassMember
 convertClassMember (Ts.FuncDecl f) = Kt.ClassFunction $ convertFunc f
@@ -44,13 +40,75 @@ convertClass (ClassD decos name superclasses members) =
     Kt.Class
         { Kt.className = name ++ "Proxy"
         , Kt.classModifiers = []
-        , Kt.fieldParameters = [Parameter "ref"
+        , Kt.classFieldParameters = [Parameter "ref"
                     (RefType "ArkObjectSafeReference")  Nothing []]
         , primaryConstructor = Nothing
-        , superTypes = []
-        , typeParameters = []
+        , classSuperTypes = []
+        , classTypeParameters = []
         , classBody = map convertClassMember members
         }
+
+generateProxyTransformer :: Ts.ClassD -> Kt.Object
+generateProxyTransformer (Ts.ClassD _ name _ _) =
+{-
+object BarProxyTransformer : ArkTsExportCustomTransformer<BarProxy> {
+    override fun fromJsObject(obj: napi_value): BarProxy {
+        return BarProxy(ArkObjectSafeReference(obj))
+    }
+
+    override fun toJsObject(obj: BarProxy): napi_value {
+        return obj.ref.handle!!
+    }
+}
+-}
+    let class_proxy_name = name ++ "Proxy"
+        object = Kt.Object {
+            Kt.objectName = class_proxy_name ++ "Transformer",
+            Kt.objectModifiers = [],
+            Kt.objectParameters = [],
+            Kt.objectSuperTypes = [Kt.AppType
+                                        (Kt.RefType "ArkTsExportCustomTransformer")
+                                        [Kt.RefType class_proxy_name]],
+            Kt.objectMembers = [
+                Kt.ClassFunction $ Kt.Function
+                    { Kt.functionName = "fromJsObject"
+                    , Kt.functionModifiers = [Kt.Override]
+                    , Kt.functionTypeParameters = []
+                    , Kt.functionParameters = [Kt.Parameter
+                                                { Kt.parameterName = "obj"
+                                                , Kt.parameterType = Kt.RefType "napi_value"
+                                                , Kt.parameterDefaultValue = Nothing
+                                                , Kt.parameterModifiers = []
+                                                }]
+                    , Kt.functionReturnType = Just $ Kt.RefType class_proxy_name
+                    , Kt.functionBody = Just $ Kt.BlockBody
+                        [ Kt.ReturnStmt (Just $
+                            Kt.CallExpr (Kt.IdentifierExpr class_proxy_name) []
+                                [Kt.CallExpr (Kt.IdentifierExpr "ArkObjectSafeReference") []
+                                    [Kt.IdentifierExpr "obj"]])
+                        ]
+                    },
+                Kt.ClassFunction $ Kt.Function
+                    { Kt.functionName = "toJsObject"
+                    , Kt.functionModifiers = [Kt.Override]
+                    , Kt.functionTypeParameters = []
+                    , Kt.functionParameters = [Kt.Parameter
+                                                { Kt.parameterName = "obj"
+                                                , Kt.parameterType = Kt.RefType class_proxy_name
+                                                , Kt.parameterDefaultValue = Nothing
+                                                , Kt.parameterModifiers = []
+                                                }]
+                    , Kt.functionReturnType = Just $ Kt.RefType "napi_value"
+                    , Kt.functionBody = Just $ Kt.BlockBody
+                        [ Kt.ReturnStmt (Just $
+                            Kt.MemberExpr
+                                (Kt.MemberExpr (Kt.IdentifierExpr "obj") "ref")
+                                "handle" `Kt.OpPostfix` Kt.BangBang)
+                        ]
+                    }
+                ]
+        }
+        in object
 
 convertFunc :: FuncD -> Kt.Function
 convertFunc f@(FuncD _ name decos params ret_ty) =

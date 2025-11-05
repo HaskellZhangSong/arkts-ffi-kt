@@ -43,9 +43,9 @@ data Var = Var
 data Class = Class
   { className :: String
   , classModifiers :: [Modifier]
-  , typeParameters :: [TypeParameter]
-  , fieldParameters :: [Parameter]
-  , superTypes :: [KotlinType]
+  , classTypeParameters :: [TypeParameter]
+  , classFieldParameters :: [Parameter]
+  , classSuperTypes :: [KotlinType]
   , primaryConstructor :: Maybe Constructor
   , classBody :: [ClassMember]
   } deriving (Eq, Show)
@@ -71,6 +71,7 @@ data Interface = Interface
 data Object = Object
   { objectName :: String
   , objectModifiers :: [Modifier]
+  , objectParameters :: [Parameter]
   , objectSuperTypes :: [KotlinType]
   , objectMembers :: [ClassMember]
   } deriving (Eq, Show)
@@ -157,7 +158,8 @@ data KotlinType
   | FunctionType [KotlinType] KotlinType      -- (Int, String) -> Boolean
   | TupleType [KotlinType]                    -- (T1, T2,...)
   | QualifiedType [String] KotlinType         -- QualifiedName
-  | ArrayType KotlinType                     -- Array<Type>
+  | ArrayType KotlinType   
+  | AppType KotlinType [KotlinType]                  -- Array<Type>
   deriving (Eq, Show)
 
 isPrimType :: KotlinType -> Bool
@@ -262,7 +264,9 @@ instance Pretty Class where
         then mempty 
         else parens (hsep $ punctuate comma $ map pretty fdParams)) <>
     maybe mempty pretty ctor <>
-    prettySuperTypes supers <+>
+    (if null supers
+        then mempty
+        else prettySuperTypes supers) <+>
     prettyClassBody body
 
 instance Pretty DataClass where
@@ -286,10 +290,15 @@ instance Pretty Interface where
     prettyInterfaceBody members
 
 instance Pretty Object where
-  pretty (Object name mods supers members) =
+  pretty (Object name mods param supers members) =
     hsep (map pretty mods) <+>
     "object" <+> pretty name <>
-    prettySuperTypes supers <+>
+    (if null param 
+        then mempty 
+        else parens (hsep $ punctuate comma $ map pretty param)) <>
+    (if null supers
+        then mempty
+        else prettySuperTypes supers) <+>
     prettyClassBody members
 
 instance Pretty KotlinEnum where
@@ -368,6 +377,7 @@ instance Pretty KotlinType where
     parens (hsep $ punctuate comma $ map pretty types)
   pretty (QualifiedType ns ty) = pretty (intercalate "." ns) <> "." <> pretty ty
   pretty (ArrayType ty) = "Array<" <> pretty ty <> ">"
+  pretty (AppType ty args) = pretty ty <> "<" <> hsep (punctuate comma $ map pretty args) <> ">"
 
 
 instance Pretty Modifier where
@@ -447,7 +457,7 @@ prettyTypeParams tyParams = "<" <> hsep (punctuate comma $ map pretty tyParams) 
 
 prettySuperTypes :: [KotlinType] -> Doc ann
 prettySuperTypes [] = mempty
-prettySuperTypes supers = ": " <+> hsep (punctuate comma $ map pretty supers)
+prettySuperTypes supers = mempty <+> ":" <+> hsep (punctuate comma $ map pretty supers)
 
 prettyClassBody :: [ClassMember] -> Doc ann
 prettyClassBody [] = "{}"
