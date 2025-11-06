@@ -47,33 +47,59 @@ convertClassMember (Ts.FuncDecl f) = Kt.ClassFunction $ convertFunc f
 convertClassMember (Ts.VarDecl v) = Kt.ClassProperty $ convertVar v
 convertClassMember (Ts.ClassDecl v) = error $ "Nested classes not supported" ++ show v
 
+generateClassProxyDefaultConstructor :: ClassD -> Kt.ClassMember
+generateClassProxyDefaultConstructor (ClassD decos name _ _) =
+    let module_path = getArkModulePath decos
+    in 
+    Kt.ClassConstructor $ Kt.Constructor
+        { Kt.constructorParameters = []
+        , Kt.constructorBody = Just $ Kt.BlockBody [
+            Kt.DeclarationAssignmentStmt Kt.M_Var "module" (Kt.CallExpr (Kt.IdentifierExpr "ArkModule") [] [Kt.LiteralString module_path]),
+            Kt.DeclarationAssignmentStmt Kt.M_Var "clazz" (Kt.CallExpr (Kt.MemberExpr (Kt.IdentifierExpr "module") "getExportClass") [] [Kt.LiteralString name]),
+            Kt.DeclarationAssignmentStmt Kt.M_Var "instance" (Kt.CallExpr (Kt.MemberExpr (Kt.IdentifierExpr "clazz") "newInstance") [] []),
+            Kt.AssignmentStmt (Kt.MemberExpr Kt.ThisExpr "ref") (Kt.CallExpr (Kt.IdentifierExpr "ArkObjectSafeReference") []
+                                                [Kt.CallExpr (Kt.MemberExpr (Kt.IdentifierExpr "instance") "getNapiValue") [] []])
+        ]}
+
+generateClassProxyConstructor :: ClassD -> Kt.ClassMember
+generateClassProxyConstructor (ClassD _ name _ _) = 
+    Kt.ClassConstructor $ Kt.Constructor
+        { Kt.constructorParameters = [
+            Kt.Parameter
+                { Kt.parameterName = "ref"
+                , Kt.parameterType = Kt.RefType "ArkObjectSafeReference"
+                , Kt.parameterDefaultValue = Nothing
+                , Kt.parameterModifiers = []
+                }
+            ]
+        , Kt.constructorBody = Just $ Kt.BlockBody [
+            Kt.AssignmentStmt (Kt.MemberExpr Kt.ThisExpr "ref") (Kt.IdentifierExpr "ref")
+        ]}
+
 convertClass :: ClassD -> Kt.Class
-convertClass (ClassD decos name superclasses members) =
-    Kt.Class
+convertClass c@(ClassD decos name superclasses members) =
+    let ref_var_decl = Kt.Property
+            { Kt.propertyName = "ref"
+            , Kt.propertyModifiers = [Kt.M_Val]
+            , Kt.propertyType = Just $ Kt.RefType "ArkObjectSafeReference"
+            , Kt.propertyInitializer = Nothing
+            , Kt.propertyGetter = Nothing
+            , Kt.propertySetter = Nothing
+            }
+    in Kt.Class
         { Kt.classAnnotations = [Annotation "ArkTsExportedClass" ["curstomTransform = True"]]
         , Kt.className = name ++ "Proxy"
         , Kt.classModifiers = []
-        , Kt.classFieldParameters = [Parameter "ref"
-                    (RefType "ArkObjectSafeReference")  Nothing []]
-        , primaryConstructor = Nothing
+        , Kt.classFieldParameters = []
         , classSuperTypes = []
         , classTypeParameters = []
-        , classBody = map convertClassMember members
+        , classBody = [ClassProperty ref_var_decl,
+                       generateClassProxyDefaultConstructor c,
+                       generateClassProxyConstructor c] ++ map convertClassMember members
         }
 
 generateProxyTransformer :: Ts.ClassD -> Kt.Object
 generateProxyTransformer (Ts.ClassD _ name _ _) =
-{-
-object BarProxyTransformer : ArkTsExportCustomTransformer<BarProxy> {
-    override fun fromJsObject(obj: napi_value): BarProxy {
-        return BarProxy(ArkObjectSafeReference(obj))
-    }
-
-    override fun toJsObject(obj: BarProxy): napi_value {
-        return obj.ref.handle!!
-    }
-}
--}
     let class_proxy_name = name ++ "Proxy"
         object = Kt.Object {
             Kt.objectAnnotations = [Annotation "ArkTsExportCustomTransform" 
@@ -199,10 +225,10 @@ convertGlobalFuncBody :: FuncD -> Kt.FunctionBody
 convertGlobalFuncBody (FuncD Func name decos params ret_ty) =
     let ark_module_path = getArkModulePath decos
         common_body = [
-                AssignmentStmt M_Val "mod" (CallExpr (IdentifierExpr "ArkModule")  [] [(LiteralString ark_module_path)]),
-                AssignmentStmt M_Val "entry" (CallExpr (IdentifierExpr "ArkObjectSafeReference") []
+                DeclarationAssignmentStmt M_Val "mod" (CallExpr (IdentifierExpr "ArkModule")  [] [(LiteralString ark_module_path)]),
+                DeclarationAssignmentStmt M_Val "entry" (CallExpr (IdentifierExpr "ArkObjectSafeReference") []
                                                 [CallExpr (MemberExpr (IdentifierExpr "mod") "getNapiValue") [] []]),
-                AssignmentStmt M_Val "func" (CallExpr (MemberExpr (IdentifierExpr "entry") "get")  [] [LiteralString name])]
+                DeclarationAssignmentStmt M_Val "func" (CallExpr (MemberExpr (IdentifierExpr "entry") "get")  [] [LiteralString name])]
         return_type = (defaultType ret_ty)
         -- (func!!.invoke<ArkObjectSafeReference>())!!
         ret_stmt = (OpPostfix

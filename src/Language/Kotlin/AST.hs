@@ -4,10 +4,6 @@ module Language.Kotlin.AST where
 
 import Prettyprinter
 import Data.List (intercalate)
-import Language.TypeScript.AST (isPrimType)
-import Data.Derive.IsDataCon
-import Text.Parsec.Expr (Operator(Postfix))
-import Text.Pretty.Simple.Internal.Printer hiding (Annotation, Open)
 
 -- | Main Kotlin compilation unit
 data KotlinFile = KotlinFile 
@@ -52,7 +48,6 @@ data Class = Class
   , classTypeParameters :: [TypeParameter]
   , classFieldParameters :: [Parameter]
   , classSuperTypes :: [KotlinType]
-  , primaryConstructor :: Maybe Constructor
   , classBody :: [ClassMember]
   } deriving (Eq, Show)
 
@@ -137,9 +132,8 @@ data InterfaceMember
 
 -- | Constructor declaration
 data Constructor = Constructor
-  { constructorModifiers :: [Modifier]
-  , constructorParameters :: [Parameter]
-  , constructorBody :: Maybe ConstructorBody
+  { constructorParameters :: [Parameter]
+  , constructorBody :: Maybe FunctionBody
   } deriving (Eq, Show)
 
 -- | Parameter declaration
@@ -206,12 +200,6 @@ data FunctionBody
   | BlockBody [Statement]
   deriving (Eq, Show)
 
--- | Constructor body
-data ConstructorBody
-  = DelegatingConstructor [Expression]
-  | ConstructorBlock [Statement]
-  deriving (Eq, Show)
-
 -- | Property accessor (getter/setter)
 data PropertyAccessor = PropertyAccessor
   { accessorModifiers :: [Modifier]
@@ -236,7 +224,8 @@ data Expression
 data Statement
   = ExpressionStmt Expression
   | ReturnStmt (Maybe Expression)
-  | AssignmentStmt ParameterModifier String Expression
+  | DeclarationAssignmentStmt ParameterModifier String Expression
+  | AssignmentStmt Expression Expression
   deriving (Eq, Show)
 
 -- Pretty Printer Instances
@@ -264,7 +253,7 @@ instance Pretty KotlinDeclaration where
   pretty (VarDecl var) = pretty var
 
 instance Pretty Class where
-  pretty (Class anno name mods tyParams fdParams supers ctor body) =
+  pretty (Class anno name mods tyParams fdParams supers body) =
     (if null anno 
         then mempty 
         else vsep (map pretty anno) <> line) <>
@@ -274,7 +263,6 @@ instance Pretty Class where
     (if null fdParams 
         then mempty 
         else parens (hsep $ punctuate comma $ map pretty fdParams)) <>
-    maybe mempty pretty ctor <>
     (if null supers
         then mempty
         else prettySuperTypes supers) <+>
@@ -370,8 +358,7 @@ instance Pretty InterfaceMember where
   pretty (InterfaceInterface iface) = pretty iface
 
 instance Pretty Constructor where
-  pretty (Constructor mods params body) =
-    hsep (map pretty mods) <+>
+  pretty (Constructor params body) =
     "constructor" <>
     parens (hsep $ punctuate comma $ map pretty params) <>
     maybe mempty (\b -> pretty b) body
@@ -444,10 +431,6 @@ instance Pretty FunctionBody where
   pretty (ExpressionBody expr) = "=" <+> pretty expr
   pretty (BlockBody stmts) = "" <+> "{" <> line <> indent 2 (vsep $ map pretty stmts) <> line <> "}"
 
-instance Pretty ConstructorBody where
-  pretty (DelegatingConstructor args) = ":" <+> "this" <> parens (hsep $ punctuate comma $ map pretty args)
-  pretty (ConstructorBlock stmts) = "{" <> line <> indent 2 (vsep $ map pretty stmts) <> line <> "}"
-
 instance Pretty PropertyAccessor where
   pretty (PropertyAccessor mods body) =
     hsep (map pretty mods) <> maybe mempty pretty body
@@ -474,7 +457,8 @@ instance Pretty Statement where
   pretty (ExpressionStmt expr) = pretty expr
   pretty (ReturnStmt Nothing) = "return"
   pretty (ReturnStmt (Just expr)) = "return" <+> pretty expr
-  pretty (AssignmentStmt mod var expr) = pretty mod <+> pretty var <+> "=" <+> pretty expr
+  pretty (DeclarationAssignmentStmt mod var expr) = pretty mod <+> pretty var <+> "=" <+> pretty expr
+  pretty (AssignmentStmt lhs rhs) = pretty lhs <+> "=" <+> pretty rhs
 
 -- Helper functions for pretty printing
 
@@ -488,7 +472,7 @@ prettySuperTypes supers = mempty <+> ":" <+> hsep (punctuate comma $ map pretty 
 
 prettyClassBody :: [ClassMember] -> Doc ann
 prettyClassBody [] = "{}"
-prettyClassBody members = "{" <> line <> indent 2 (vsep $ map pretty members) <> line <> "}"
+prettyClassBody members = "{" <> line <> indent 2 (vsep $ punctuate line $ map pretty members) <> line <> "}"
 
 prettyInterfaceBody :: [InterfaceMember] -> Doc ann
 prettyInterfaceBody [] = "{}"
