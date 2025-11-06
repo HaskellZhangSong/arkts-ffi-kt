@@ -11,7 +11,7 @@ import Text.Pretty.Simple.Internal.Printer hiding (Annotation, Open)
 
 -- | Main Kotlin compilation unit
 data KotlinFile = KotlinFile 
-  { packageDecl :: [String]
+  { packageDecl :: String
   , imports :: [Import]
   , declarations :: [KotlinDeclaration]
   } deriving (Eq, Show)
@@ -244,7 +244,7 @@ data Statement
 instance Pretty KotlinFile where
   pretty (KotlinFile pkg imps decls) = 
     vsep $
-      [ "package" <+> hcat (punctuate "." (map pretty pkg)) <> line
+      [ "package" <+>  pretty pkg <> line
       , (vsep (map pretty imps)) <> line
       , (vsep $ punctuate line $ map pretty decls)
       ]

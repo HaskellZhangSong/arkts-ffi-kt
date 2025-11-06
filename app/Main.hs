@@ -3,6 +3,7 @@
 module Main (main) where
 
 import Lib
+import Options
 import Control.Monad
 import Data.Aeson
 import System.Console.CmdArgs
@@ -19,25 +20,6 @@ import System.Exit
 import System.FilePath
 import System.Process
 import Data.List
-data CmdOptions = CmdOptions {
-    input_file :: FilePath,
-    output_file :: FilePath,
-    dump_json :: Bool,
-    dump_ts_node :: Bool,
-    dump_ts_ast :: Bool,
-    dump_kotlin_ast :: Bool,
-    keep_json :: Bool
-} deriving (Show, Eq, Data, Typeable)
-
-options = CmdOptions {
-    input_file = def &= args &= typ "FILES",
-    output_file = "a.out.kt" &= help "output file" &= typFile,
-    dump_json = False &= help "dump intermediate JSON from tsp",
-    dump_ts_node = False &= help "dump TypeScript TsNode AST",
-    dump_ts_ast = False &= help "dump TypeScript AST",
-    dump_kotlin_ast = False &= help "dump generated Kotlin AST",
-    keep_json = False &= help "keep intermediate JSON file"
-}
 
 create_temp_file :: CmdOptions -> IO FilePath
 create_temp_file _ = do
@@ -128,7 +110,7 @@ main = do
     ts_node <- get_ts_node opts json_file
     ast <- compile_to_ts opts json_file ts_node
     -- pPrint ast
-    let kt_asts = convertSourceFile ast
+    let kt_asts = convertSourceFile opts ast
     when (dump_kotlin_ast opts) $ do
         putStrLn $ replicate 80 '='
         putStrLn "Dumped Kotlin AST:"

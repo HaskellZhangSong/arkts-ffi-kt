@@ -8,6 +8,8 @@ import Language.Kotlin.AST
 import Language.Kotlin.ParType
 import qualified Language.TypeScript.AST as Ts
 import qualified Data.List as L (lookup, find)
+import Options
+import System.Console.CmdArgs (CmdArgs)
 
 -- Should check if decorator is corectly
 hasDecorator :: Decl -> Bool
@@ -16,10 +18,10 @@ hasDecorator (Ts.VarDecl (Ts.VarD [] _ _)) = False
 hasDecorator (Ts.ClassDecl (Ts.ClassD [] _ _ _)) = False
 hasDecorator _ = True
 
-convertSourceFile :: SourceFile -> Kt.KotlinFile
-convertSourceFile (SourceFile decls) =
+convertSourceFile :: CmdOptions -> SourceFile -> Kt.KotlinFile
+convertSourceFile opts (SourceFile decls) =
     Kt.KotlinFile
-        { Kt.packageDecl = ["arkts", "ffi"]
+        { Kt.packageDecl = package_name opts
         , Kt.imports = [Kt.Import "com.bytedance.kmp.ohos_ffi.types.FFIProxy"
                        , Kt.Import "com.bytedance.kmp.ohos_ffi.types.ArkObjectSafeReference"
                        , Kt.Import "platform.ohos.napi.*"
