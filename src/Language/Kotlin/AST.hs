@@ -19,7 +19,6 @@ data KotlinFile = KotlinFile
 -- | Import declarations
 data Import = Import 
   { importPath :: String
-  , importAlias :: Maybe String
   } deriving (Eq, Show)
 
 -- | Top-level Kotlin declarations
@@ -245,14 +244,14 @@ data Statement
 instance Pretty KotlinFile where
   pretty (KotlinFile pkg imps decls) = 
     vsep $
-      [ "package" <+> hcat (punctuate "." (map pretty pkg))
-      , (vsep (map pretty imps))
+      [ "package" <+> hcat (punctuate "." (map pretty pkg)) <> line
+      , (vsep (map pretty imps)) <> line
       , (vsep $ punctuate line $ map pretty decls)
       ]
 
 instance Pretty Import where
-  pretty (Import path alias) = 
-    "import" <+> pretty path <> maybe mempty (\a -> " as " <> pretty a) alias
+  pretty (Import path) = 
+    "import" <+> pretty path
 
 instance Pretty KotlinDeclaration where
   pretty (ClassDecl cls) = pretty cls

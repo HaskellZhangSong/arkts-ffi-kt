@@ -20,7 +20,17 @@ convertSourceFile :: SourceFile -> Kt.KotlinFile
 convertSourceFile (SourceFile decls) =
     Kt.KotlinFile
         { Kt.packageDecl = ["arkts", "ffi"]
-        , Kt.imports = []
+        , Kt.imports = [Kt.Import "com.bytedance.kmp.ohos_ffi.types.FFIProxy"
+                       , Kt.Import "com.bytedance.kmp.ohos_ffi.types.ArkObjectSafeReference"
+                       , Kt.Import "platform.ohos.napi.*"
+                       , Kt.Import "kotlinx.cinterop.*"
+                       , Kt.Import "com.bytedance.kmp.ohos_ffi.annotation.ArkTsExportClass"
+                       , Kt.Import "com.bytedance.kmp.ohos_ffi.annotation.ArkTsExportCustomTransform"
+                       , Kt.Import "com.bytedance.kmp.ohos_ffi.transform.ArkTsExportCustomTransformer"
+                       , Kt.Import "com.bytedance.kmp.ohos_ffi.types.ArkModule"
+                       , Kt.Import "com.bytedance.kmp.ohos_ffi.types.transformer.IntTypeTransformer"
+                       , Kt.Import "com.bytedance.kmp.ohos_ffi.types.transformer.ListTypeTransformer"
+                       ]
         , Kt.declarations = concatMap convertDecl (filter hasDecorator decls)
         }
 
