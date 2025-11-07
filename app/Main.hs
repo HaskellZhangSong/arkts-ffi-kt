@@ -96,7 +96,12 @@ main = do
             putStrLn "Please install TypeScript Parser (tsp)."
             exitFailure
     opts <- cmdArgs $ modes [options]    
-
+    if null (input_file opts)
+        then do
+            putStrLn "Input file and output file must be specified."
+            print $ cmdArgsMode options
+            exitFailure
+        else return ()
     let input_file_path = input_file opts
     let input_type = get_input_type opts
     json_file <- case input_type of
