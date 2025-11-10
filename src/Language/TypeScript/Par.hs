@@ -55,7 +55,6 @@ pDecl = do
             constr_decl <- pConstrDecl
             return $ FuncDecl constr_decl
         _ -> do
-            traceM $ "Unknown declaration kind: " ++ show n
             lift $ Left n
 
 has_decorator :: HasCallStack => Parser Bool
@@ -118,14 +117,21 @@ pDecorator = do
             pushKindChildren "CallExpression"
             ident <- pKindContent "Identifier"
             eat "("
-            pushKindChildren "SyntaxList"
-            pushKindChildren "ObjectLiteralExpression"
-            eat "{"
-            pushKindChildren "SyntaxList"
-            params <- sepBy pDecoratorParam (eat ",")
-            eat "}"
-            eat ")"
-            return $ DecoratorPara ident params
+            sl <- peek
+            case children sl of
+                Nothing -> do
+                    skip
+                    eat ")"
+                    return $ DecoratorPara ident []
+                Just _ -> do
+                    pushKindChildren "SyntaxList"
+                    pushKindChildren "ObjectLiteralExpression"
+                    eat "{"
+                    pushKindChildren "SyntaxList"
+                    params <- sepBy pDecoratorParam (eat ",")
+                    eat "}"
+                    eat ")"
+                    return $ DecoratorPara ident params
 
 pDecoratorParam :: HasCallStack => Parser (String, String)
 pDecoratorParam = do
@@ -193,6 +199,9 @@ pVarDecl = do
     ident <- pKindContent "Identifier"
     eat ":"
     ty <- pType
+    eat "="
+    -- skip expression of var
+    skip
     -- TODO parse initializer
     return $ VarD {
         varName = ident,
