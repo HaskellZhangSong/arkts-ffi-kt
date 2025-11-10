@@ -23,7 +23,8 @@ hasDecorator _ = True
 convertSourceFile :: CmdOptions -> SourceFile -> Kt.KotlinFile
 convertSourceFile opts (SourceFile decls) =
     Kt.KotlinFile
-        { Kt.packageDecl = package_name opts
+        { Kt.annotations = ["@file:OptIn(ExperimentalForeignApi::class)"]
+        , Kt.packageDecl = package_name opts
         , Kt.imports = [Kt.Import "com.bytedance.kmp.ohos_ffi.types.FFIProxy"
                        , Kt.Import "com.bytedance.kmp.ohos_ffi.types.ArkObjectSafeReference"
                        , Kt.Import "platform.ohos.napi.*"
@@ -184,7 +185,7 @@ convertMethodBody f@(FuncD Method name decos params ret_ty) =
                             Just (DecoratorPara _ ps) -> map (\((_, deco_t), (n, _)) -> (n, pKtType deco_t)) (zip (init ps) params)
                             _ -> map (\(n,t) -> (n, defaultType t)) params
             ret_kt_ty = let t = convReturnType (head decos) ret_ty in t
-            common_method_expr = CallExpr (MemberExpr (IdentifierExpr "ref") name)
+            common_method_expr = CallExpr (MemberExpr (IdentifierExpr "ref") "callMethod")
                                                     [RefType (refTypeName ret_kt_ty)]
                                                     -- if Argument is primitive, pass value directly
                                                     -- if Argument is reference, pass x.ref

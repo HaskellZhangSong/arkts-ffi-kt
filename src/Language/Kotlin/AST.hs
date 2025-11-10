@@ -7,7 +7,8 @@ import Data.List (intercalate)
 
 -- | Main Kotlin compilation unit
 data KotlinFile = KotlinFile 
-  { packageDecl :: String
+  { annotations :: [String]
+  , packageDecl :: String
   , imports :: [Import]
   , declarations :: [KotlinDeclaration]
   } deriving (Eq, Show)
@@ -231,9 +232,12 @@ data Statement
 -- Pretty Printer Instances
 
 instance Pretty KotlinFile where
-  pretty (KotlinFile pkg imps decls) = 
+  pretty (KotlinFile anns pkg imps decls) = 
     vsep $
-      [ "package" <+>  pretty pkg <> line
+      [ (if null anns 
+          then mempty 
+          else vsep (map pretty anns) <> line) 
+      , "package" <+>  pretty pkg <> line
       , (vsep (map pretty imps)) <> line
       , (vsep $ punctuate line $ map pretty decls)
       ]
