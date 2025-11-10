@@ -87,7 +87,7 @@ convertClass c@(ClassD decos name superclasses members) =
             , Kt.propertySetter = Nothing
             }
     in Kt.Class
-        { Kt.classAnnotations = [Annotation "ArkTsExportClass" ["curstomTransform = True"]]
+        { Kt.classAnnotations = [Annotation "ArkTsExportClass" ["customTransform = true"]]
         , Kt.className = name ++ "Proxy"
         , Kt.classModifiers = []
         , Kt.classFieldParameters = []
@@ -212,9 +212,9 @@ convertMethodBody f@(FuncD Method name decos params ret_ty) =
 convertMethodBody _ = error $ "Only Method function type is supported in method function body generation"
 
 getArkModulePath :: [Decorator] -> String
-getArkModulePath decos =
-    case findDecorator "ExportKotlinFunction" decos of
-        Just (DecoratorPara _ p) ->
+getArkModulePath (d:ds) =
+    case d of
+        (DecoratorPara _ p) ->
             case L.lookup "ark_module_path" p of
                 Just path -> path
                 Nothing -> "<no_module_path>"
