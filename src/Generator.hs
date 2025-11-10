@@ -195,8 +195,8 @@ convertMethodBody f@(FuncD Method name decos params ret_ty) =
                                                             else MemberExpr (IdentifierExpr param_nm) "ref")
                                                         para_kt_nm_tys)
                     in if (Kt.isPrimType ret_kt_ty)
-                    then Kt.BlockBody $ [ExpressionStmt $ common_method_expr]
-                    else Kt.BlockBody $ [ExpressionStmt $
+                    then Kt.BlockBody $ [ReturnStmt $ Just $ common_method_expr]
+                    else Kt.BlockBody $ [ReturnStmt $ Just $
                                                     CallExpr (IdentifierExpr (refTypeName ret_kt_ty)) []
                                                     [common_method_expr]]
 convertMethodBody _ = error $ "Only Method function type is supported in method function body generation"
