@@ -87,7 +87,7 @@ convertClass c@(ClassD decos name superclasses members) =
             , Kt.propertySetter = Nothing
             }
     in Kt.Class
-        { Kt.classAnnotations = [Annotation "ArkTsExportedClass" ["curstomTransform = True"]]
+        { Kt.classAnnotations = [Annotation "ArkTsExportClass" ["curstomTransform = True"]]
         , Kt.className = name ++ "Proxy"
         , Kt.classModifiers = []
         , Kt.classFieldParameters = []
