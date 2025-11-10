@@ -119,17 +119,22 @@ pDecorator = do
             ident <- pKindContent "Identifier"
             eat "("
             pushKindChildren "SyntaxList"
+            pushKindChildren "ObjectLiteralExpression"
+            eat "{"
+            pushKindChildren "SyntaxList"
             params <- sepBy pDecoratorParam (eat ",")
+            eat "}"
             eat ")"
             return $ DecoratorPara ident params
 
 pDecoratorParam :: HasCallStack => Parser (String, String)
 pDecoratorParam = do
-    pushKindChildren "BinaryExpression"
-    key <- pKindContent "Identifier"
-    eat "="
+    pushKindChildren "PropertyAssignment"
+    key <- pKindContent "StringLiteral"
+    eat ":"
     value <- pKindContent "StringLiteral"
-    return (key, value)
+    return (filter (/= '\"') key, filter (/= '\"') value)
+    
 
 pDecorators :: HasCallStack => Parser [Decorator]
 pDecorators = do
@@ -224,6 +229,7 @@ pFuncDecl = do
     pushKindChildren "FunctionDeclaration"
     decos <- pDecorators
     eat "function"
+    
     pAbsFuncPart Func decos
 
 pInterfaceDecl = undefined
