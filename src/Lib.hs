@@ -9,6 +9,7 @@ module Lib where
 import Data.Aeson
 import Data.Aeson.TH
 import Data.Data
+
 data Loc = Loc {
     line   :: Int,
     column :: Int
@@ -25,3 +26,21 @@ data TsNode = TsNode {
 } deriving (Show, Eq, Ord, Data)
 
 deriveJSON defaultOptions ''TsNode
+
+decl_list :: [String]
+decl_list = [
+    "ClassDeclaration",
+    "FunctionDeclaration",
+    "PropertyDeclaration"
+    ]
+
+filterSourceFile :: TsNode -> TsNode
+filterSourceFile (TsNode "SourceFile" (Just (x:xs)) cont p) = 
+    TsNode "SourceFile" (Just $ filterSyntax x: xs) cont p
+
+filterSourceFile _ = error "Not a SourceFile node"
+
+filterSyntax :: TsNode -> TsNode
+filterSyntax (TsNode "SyntaxList" (Just chn) cont p) = 
+    TsNode "SyntaxList" (Just $ filter (\child -> kind child `elem` decl_list) chn) cont p
+filterSyntax _ = error "Not a SyntaxList node"

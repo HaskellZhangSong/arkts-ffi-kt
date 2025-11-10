@@ -113,7 +113,8 @@ main = do
             return tmp_file
 
     ts_node <- get_ts_node opts json_file
-    ast <- compile_to_ts opts json_file ts_node
+    let filtered_node = filterSourceFile ts_node
+    ast <- compile_to_ts opts json_file filtered_node
     -- pPrint ast
     let kt_asts = convertSourceFile opts ast
     when (dump_kotlin_ast opts) $ do
