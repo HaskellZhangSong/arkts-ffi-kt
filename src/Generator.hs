@@ -147,7 +147,7 @@ generateProxyTransformer (Ts.ClassD _ name _ _) =
                         [ Kt.ReturnStmt (Just $
                             Kt.MemberExpr
                                 (Kt.MemberExpr (Kt.IdentifierExpr "obj") "ref")
-                                "handle" `Kt.OpPostfix` Kt.BangBang)
+                                "handle")
                         ]
                     }
                 ]
