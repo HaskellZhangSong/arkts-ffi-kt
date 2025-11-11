@@ -18,6 +18,7 @@ import Text.Pretty.Simple
 import qualified Data.ByteString.Lazy as BS
 import Data.Aeson
 import GHC.Stack
+import GHC.RTS.Flags (ProfFlags(retainerSelector))
 
 pSourceFile :: HasCallStack => Parser SourceFile
 pSourceFile = do
@@ -144,8 +145,8 @@ pDecoratorParam = do
 
 pDecorators :: HasCallStack => Parser [Decorator]
 pDecorators = do
-    has_decorator <- peekKind "SyntaxList"
-    decos <- if has_decorator
+    hd <- has_decorator
+    decos <- if hd
                 then do 
                     pushKindChildren "SyntaxList"
                     many pDecorator
@@ -185,28 +186,57 @@ pType = do
         "NumberKeyword" -> return $ TyRef "number"
         "StringKeyword" -> return $ TyRef "string"
         "BooleanKeyword" -> return $ TyRef "boolean"
+        "BigIntKeyword" -> return $ TyRef "bigint"
         "ArrayType" -> return $ TyArray (TyRef "any")  -- TODO: parse element type
         "TypeReference" -> do
             let ident = fromJust $ content $ head $ fromJust $ children n
             return $ TyRef ident
         _ -> error $ "Unsupported type kind: " ++ show n
 
+pModifiers :: HasCallStack => Parser [Modifier]
+pModifiers = do
+    mods <- many $ do
+        mod_kind <- peek
+        case kind mod_kind of
+            "PublicKeyword" -> eat "public" >> return Public
+            "PrivateKeyword" -> eat "private" >> return Private
+            "ProtectedKeyword" -> eat "protected" >> return Protected
+            "StaticKeyword" -> eat "static" >> return Static
+            "ReadonlyKeyword" -> eat "readonly" >> return Readonly
+            _ -> lift $ Left (error $ "Unexpected modifier: " ++ show mod_kind)
+    return mods
+
 pVarDecl :: HasCallStack => Parser VarD
 pVarDecl = do
-    ch <- pKindChildren "PropertyDeclaration"
-    push ch
+    pushKindChildren "PropertyDeclaration"
     decos <- pDecorators
+    md <- peek
+    let is_syntax_list = kind md == "SyntaxList"
+    mods <- if is_syntax_list 
+                then do
+                    pushKindChildren "SyntaxList"
+                    pModifiers
+                else return []
+
     ident <- pKindContent "Identifier"
+    i <- peek
+    let nullable = kind i == "QuestionToken"
+    when nullable (eat "?")
     eat ":"
+    
     ty <- pType
-    eat "="
-    -- skip expression of var
-    skip
+    eq <- peek
+    when (kind eq == "FirstAssignment") $ do 
+                                    eat "="
+                                    -- skip expression of var
+                                    skip
+    void $ many (eat ";")
     -- TODO parse initializer
     return $ VarD {
+        varDecorators = decos,
+        varModifier = mods,
         varName = ident,
-        varType = ty,
-        varDecorators = decos
+        varType = if nullable then TyNullable ty else ty
     }
 
 pAbsFuncPart :: HasCallStack => FuncType -> [Decorator] -> Parser FuncD

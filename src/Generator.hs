@@ -11,12 +11,12 @@ import qualified Data.List as L (lookup, find)
 import Options
 import System.Console.CmdArgs (CmdArgs)
 import Debug.Trace
-import Language.Kotlin.AST (KotlinType(refTypeName))
+import Language.Kotlin.AST (getRefTypeName)
 
 -- Should check if decorator is corectly
 hasDecorator :: Decl -> Bool
 hasDecorator (Ts.FuncDecl (Ts.FuncD _ _ [] _ _)) = False
-hasDecorator (Ts.VarDecl (Ts.VarD [] _ _)) = False
+hasDecorator (Ts.VarDecl (Ts.VarD [] [] _ _)) = False
 hasDecorator (Ts.ClassDecl (Ts.ClassD [] _ _ _)) = False
 hasDecorator _ = True
 
@@ -189,7 +189,7 @@ convertMethodBody f@(FuncD Method name decos params ret_ty) =
                             _ -> map (\(n,t) -> (n, defaultType t)) params
             ret_kt_ty = let t = convReturnType (head decos) ret_ty in t
             common_method_expr = CallExpr (MemberExpr (IdentifierExpr "ref") "callMethod")
-                                                    [RefType (refTypeName ret_kt_ty)]
+                                                    [RefType (getRefTypeName ret_kt_ty)]
                                                     -- if Argument is primitive, pass value directly
                                                     -- if Argument is reference, pass x.ref
                                                     (LiteralString name : map (\(param_nm, kt_ty) ->
@@ -204,7 +204,7 @@ convertMethodBody f@(FuncD Method name decos params ret_ty) =
                     in if (Kt.isPrimType ret_kt_ty)
                     then Kt.BlockBody $ [ReturnStmt $ Just $ conmmon_method_expr_nullable]
                     else Kt.BlockBody $ [ReturnStmt $ Just $
-                                                    CallExpr (IdentifierExpr (refTypeName ret_kt_ty)) []
+                                                    CallExpr (IdentifierExpr (getRefTypeName ret_kt_ty)) []
                                                     [conmmon_method_expr_nullable]]
 convertMethodBody _ = error $ "Only Method function type is supported in method function body generation"
 
@@ -245,7 +245,7 @@ convertGlobalFuncBody (FuncD Func name decos params ret_ty) =
             then Kt.BlockBody $ common_body ++ [ReturnStmt (Just ret_stmt)]
             else Kt.BlockBody $ common_body ++ [
                     ExpressionStmt $
-                        CallExpr (IdentifierExpr (refTypeName return_type ++ "Proxy")) [] 
+                        CallExpr (IdentifierExpr (getRefTypeName return_type ++ "Proxy")) [] 
                         [ret_stmt]]
 convertGlobalFuncBody _ = error $ "Only Func function type is supported in global function body generation"
 
@@ -284,20 +284,23 @@ convParam _ (ts_name, ty) = Kt.Parameter
                 }
 
 convertType :: [Decorator] -> Ts.Type -> Kt.KotlinType
-convertType [DecoratorPara n p] (TyRef name) = case L.lookup "type" p of
-                                                Nothing -> RefType name
+convertType [DecoratorPara _ p] (TyRef nm) = case L.lookup "type" p of
+                                                Nothing -> RefType nm
                                                 Just t -> pKtType t
 
 convertType _ (TyRef "number") = RefType "Double"
+convertType _ (TyRef "bigint") = RefType "Long"
 convertType _ (TyRef "string") = RefType "String"
 convertType _ (TyRef "boolean") = RefType "Boolean"
 convertType _ (TyRef "any") = RefType "Any"
+convertType _ (TyRef r) = RefType $ r ++ "Proxy"
 convertType d (TyArray ty) = ArrayType (convertType d ty)
 convertType d (TyNullable ty) = NullableType (convertType d ty)
 convertType d ty = error $ show d ++ " " ++ show ty ++ "not implemented"
 
 defaultType :: Ts.Type -> Kt.KotlinType
 defaultType (TyRef "number") = RefType "Double"
+defaultType (TyRef "bigint") = RefType "Long"
 defaultType (TyRef "string") = RefType "String"
 defaultType (TyRef "boolean") = RefType "Boolean"
 defaultType (TyRef "any") = RefType "Any"
@@ -313,7 +316,7 @@ findDecorator nm decos =
                     decos
 
 convertVar :: Ts.VarD -> Kt.Property
-convertVar (VarD decos n ty) =
+convertVar (VarD decos _ n ty) =
     let deco_ty = findDecorator "ExportKotlinField" decos
         kt_ty = case deco_ty of
                     Just (DecoratorPara _ p) -> case L.lookup "type" p of
@@ -323,14 +326,14 @@ convertVar (VarD decos n ty) =
                                                                     " missing type parameter"
                     _ -> defaultType ty
         get_fun = if Kt.isPrimType kt_ty
-                    then let fun = ("get" ++ Kt.refTypeName kt_ty)
+                    then let fun = ("get" ++ Kt.getRefTypeName kt_ty)
                             in CallExpr (MemberExpr (IdentifierExpr "ref") fun)
                                 [] [LiteralString n]
-                    else CallExpr (IdentifierExpr (refTypeName kt_ty))
+                    else CallExpr (IdentifierExpr (getRefTypeName kt_ty))
                                 [] [(CallExpr (IdentifierExpr "getProperty") [] [(LiteralString n)])]
 
         set_fun = if Kt.isPrimType kt_ty
-                    then let fun = "set" ++ Kt.refTypeName kt_ty
+                    then let fun = "set" ++ Kt.getRefTypeName kt_ty
                             in ExpressionStmt $ CallExpr (MemberExpr (IdentifierExpr "ref") fun)
                                 [] [LiteralString n, IdentifierExpr n]
                     else ExpressionStmt $ CallExpr (IdentifierExpr ("setProperty"))

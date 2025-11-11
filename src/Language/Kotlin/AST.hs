@@ -4,6 +4,7 @@ module Language.Kotlin.AST where
 
 import Prettyprinter
 import Data.List (intercalate)
+import Control.Monad.RWS.Class (MonadState(get))
 
 -- | Main Kotlin compilation unit
 data KotlinFile = KotlinFile 
@@ -164,6 +165,11 @@ data KotlinType
   | AppType KotlinType [KotlinType]                  -- Array<Type>
   deriving (Eq, Show)
 
+getRefTypeName :: KotlinType -> String
+getRefTypeName (RefType name) = name
+getRefTypeName (NullableType t) = getRefTypeName t
+getRefTypeName _ = error "Not a RefType"
+
 isPrimType :: KotlinType -> Bool
 isPrimType (RefType "Char") = True
 isPrimType (RefType "Byte") = True
@@ -174,6 +180,7 @@ isPrimType (RefType "Float") = True
 isPrimType (RefType "Double") = True
 isPrimType (RefType "String") = True
 isPrimType (RefType "Boolean") = True
+isPrimType (NullableType t) = isPrimType t
 isPrimType _ = False
 
 -- | Modifiers

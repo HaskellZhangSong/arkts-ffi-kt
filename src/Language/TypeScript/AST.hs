@@ -54,10 +54,13 @@ data FuncD = FuncD {
     funcReturnType :: Type
 } deriving (Show, Eq, Ord)
 
+data Modifier = Public | Private | Protected | Static | Readonly
+    deriving (Show, Eq, Ord)
 
 -- I do not need exprs
 data VarD = VarD {
     varDecorators :: [Decorator],
+    varModifier :: [Modifier],
     varName :: String,
     varType :: Type
 } deriving (Show, Eq, Ord)
