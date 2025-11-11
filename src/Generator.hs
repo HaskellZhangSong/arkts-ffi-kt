@@ -178,6 +178,9 @@ convertFunctionBody f@(FuncD fun_ty _ _ _ _) =
         Func -> convertGlobalFuncBody f
         _ -> error $ "Only Func and Method function types are supported in function body generation"
 
+wrapBangBang :: Kt.Expression -> Kt.Expression
+wrapBangBang expr = Kt.OpPostfix expr Kt.BangBang
+
 convertMethodBody :: FuncD -> Kt.FunctionBody
 convertMethodBody f@(FuncD Method name decos params ret_ty) =
         let deco_ret_kt_ty = findDecorator "ExportKotlinFunction" decos
@@ -194,11 +197,15 @@ convertMethodBody f@(FuncD Method name decos params ret_ty) =
                                                             then IdentifierExpr param_nm
                                                             else MemberExpr (IdentifierExpr param_nm) "ref")
                                                         para_kt_nm_tys)
+            is_nullable = isTyNullable ret_ty
+            conmmon_method_expr_nullable = if is_nullable
+                                            then common_method_expr
+                                            else wrapBangBang common_method_expr
                     in if (Kt.isPrimType ret_kt_ty)
-                    then Kt.BlockBody $ [ReturnStmt $ Just $ common_method_expr]
+                    then Kt.BlockBody $ [ReturnStmt $ Just $ conmmon_method_expr_nullable]
                     else Kt.BlockBody $ [ReturnStmt $ Just $
                                                     CallExpr (IdentifierExpr (refTypeName ret_kt_ty)) []
-                                                    [common_method_expr]]
+                                                    [conmmon_method_expr_nullable]]
 convertMethodBody _ = error $ "Only Method function type is supported in method function body generation"
 
 getArkModulePath :: [Decorator] -> String
@@ -329,7 +336,7 @@ convertVar (VarD decos n ty) =
                     else ExpressionStmt $ CallExpr (IdentifierExpr ("setProperty"))
                                 [] [LiteralString n, IdentifierExpr "value"]
 
-        getter = ExpressionBody $ get_fun
+        getter = ExpressionBody $ if isTyNullable ty then get_fun else wrapBangBang get_fun
         setter = BlockBody [set_fun]
                                 in
     Kt.Property

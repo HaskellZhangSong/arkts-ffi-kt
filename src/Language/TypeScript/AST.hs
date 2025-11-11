@@ -1,15 +1,16 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Language.TypeScript.AST where
-import GHC.Generics (Generic)
+import Data.Derive.IsDataCon
 data Decorator = Decorator {
     name :: String
 } | DecoratorPara {
     name :: String,
     para :: [(String, String)]
-} deriving (Show, Eq, Ord, Generic)
+} deriving (Show, Eq, Ord)
 
 data SourceFile = SourceFile [Decl]
-    deriving (Show, Eq, Ord, Generic)
+    deriving (Show, Eq, Ord)
 
 data Type = 
       TyRef { typeName :: String }
@@ -20,7 +21,7 @@ data Type =
     | TyUnion [Type]
     | TyIntersection [Type]
     | TyTuple [Type]
-    deriving (Show, Eq, Ord, Generic)
+    deriving (Show, Eq, Ord)
 
 isPrimType :: Type -> Bool
 isPrimType (TyRef "number") = True
@@ -28,20 +29,22 @@ isPrimType (TyRef "string") = True
 isPrimType (TyRef "boolean") = True
 isPrimType _ = False
 
+
+
 data Decl = ClassDecl ClassD
           | FuncDecl FuncD
           | VarDecl VarD
-          deriving (Show, Eq, Ord, Generic)
+          deriving (Show, Eq, Ord)
 
 data ClassD = ClassD {
     classDecorators :: [Decorator],
     className :: String,
     classSuperClasses :: [Type],
     classMembers :: [Decl]
-} deriving (Show, Eq, Ord, Generic)
+} deriving (Show, Eq, Ord)
 
 data FuncType = Func | Method | Constr
-    deriving (Show, Eq, Ord, Generic)
+    deriving (Show, Eq, Ord)
 
 data FuncD = FuncD {
     funcType :: FuncType,
@@ -49,7 +52,7 @@ data FuncD = FuncD {
     funcDecorators :: [Decorator],
     funcParams :: [(String, Type)],
     funcReturnType :: Type
-} deriving (Show, Eq, Ord, Generic)
+} deriving (Show, Eq, Ord)
 
 
 -- I do not need exprs
@@ -57,5 +60,6 @@ data VarD = VarD {
     varDecorators :: [Decorator],
     varName :: String,
     varType :: Type
-} deriving (Show, Eq, Ord, Generic)
+} deriving (Show, Eq, Ord)
 
+derive_is ''Type
