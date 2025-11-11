@@ -37,7 +37,7 @@ Installing executable arkts-ffi-kt-exe in /Users/songzh/project/haskell/arkts-ff
 ## Use
 
 ```
-arkts-ffi-kt-exe example2.ets -o test.kt
+arkts-ffi-kt-exe example2.ets -o test.kt --package-name="ffi.txt"  
 ```
 
 For `example/cases/case5_class_field_func_global_func.ets`
@@ -92,7 +92,7 @@ class BarProxy {
   }
 
   var value: Double
-    get() = ref.getDouble("value")
+    get() = ref.getDouble("value")!!
     set(value)  {
       ref.setDouble("value", value)
     }
@@ -109,7 +109,7 @@ object BarProxyTransformer : ArkTsExportCustomTransformer<BarProxy> {
   }
 
   override fun toJsObject(obj: BarProxy): napi_value {
-    return obj.ref.handle!!
+    return obj.ref.handle
   }
 }
 ```
