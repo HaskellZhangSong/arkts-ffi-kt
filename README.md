@@ -43,15 +43,16 @@ arkts-ffi-kt-exe example2.ets -o test.kt
 For `example/cases/case5_class_field_func_global_func.ets`
 
 ```typescript
-@ExportKotlinClass
+import {
+    ExportKotlinClass
+  , ExportKotlinField
+  , ExportKotlinFunction} from './Decorators'
+@ExportKotlinClass({"ark_module_path": "fds/src/main/ets/pages/ClassTest"})
 class Bar {
-  @ExportKotlinField(type = "FooProxy")
-  obj : Foo
-  @ExportKotlinField(type = "Int")
-  value : number
-  
-  @ExportKotlinFunction(x = "Int", y = "Double", z = "FooProxy", return_ = "Double")
-  bar(x: number, y : number ,z : Foo): number {
+  @ExportKotlinField({"type": "Double"})
+  value : number = 0
+  @ExportKotlinFunction({"x": "Double", "ark_module_path": "entfdsary/src/main/ets/pages/ClassTest"})
+  bar(x:number): Bar {
     return x + 1
   }
 }
@@ -60,17 +61,55 @@ class Bar {
 it will generate following kotlin code:
 
 ```kotlin
-package arkts.ffi
+@file:OptIn(ExperimentalForeignApi::class)
 
-class BarProxy(ref: ArkObjectSaafeReference) {
-  var obj: FooProxy
-    get() = FooProxy(getProperty("obj"))
-    set(value) = setProperty("obj", value)
-  var value: Int
-    get() = getInt("value")
-    set(value) = setInt("value", value)
-  fun bar(x: Int, y: Double, z: FooProxy): Double {
-    callMethod<Double>("bar", x, y, z.ref)
+package ffi.txt
+
+import com.bytedance.kmp.ohos_ffi.types.FFIProxy
+import com.bytedance.kmp.ohos_ffi.types.ArkObjectSafeReference
+import platform.ohos.napi.*
+import kotlinx.cinterop.*
+import com.bytedance.kmp.ohos_ffi.annotation.ArkTsExportClass
+import com.bytedance.kmp.ohos_ffi.annotation.ArkTsExportCustomTransform
+import com.bytedance.kmp.ohos_ffi.transform.ArkTsExportCustomTransformer
+import com.bytedance.kmp.ohos_ffi.types.ArkModule
+import com.bytedance.kmp.ohos_ffi.types.transformer.IntTypeTransformer
+import com.bytedance.kmp.ohos_ffi.types.transformer.ListTypeTransformer
+
+@ArkTsExportClass(customTransform = true)
+class BarProxy {
+  val ref: ArkObjectSafeReference
+
+  constructor() {
+    var module = ArkModule("fds/src/main/ets/pages/ClassTest")
+    var clazz = module.getExportClass("Bar")
+    var instance = clazz.newInstance()
+    this.ref = ArkObjectSafeReference(instance.getNapiValue())
+  }
+
+  constructor(ref: ArkObjectSafeReference) {
+    this.ref = ref
+  }
+
+  var value: Double
+    get() = ref.getDouble("value")
+    set(value)  {
+      ref.setDouble("value", value)
+    }
+
+  fun bar(x: Double): BarProxy {
+    return BarProxy(ref.callMethod<BarProxy>("bar", x))
+  }
+}
+
+@ArkTsExportCustomTransform(BarProxy::class)
+object BarProxyTransformer : ArkTsExportCustomTransformer<BarProxy> {
+  override fun fromJsObject(obj: napi_value): BarProxy {
+    return BarProxy(ArkObjectSafeReference(obj))
+  }
+
+  override fun toJsObject(obj: BarProxy): napi_value {
+    return obj.ref.handle!!
   }
 }
 ```
