@@ -66,3 +66,10 @@ data VarD = VarD {
 } deriving (Show, Eq, Ord)
 
 derive_is ''Type
+
+isStaticVar :: VarD -> Bool
+isStaticVar varD = Static `elem` varModifier varD
+
+isStaticDecl :: Decl -> Bool
+isStaticDecl (VarDecl v) = isStaticVar v
+isStaticDecl _ = False

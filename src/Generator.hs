@@ -98,7 +98,7 @@ convertClass c@(ClassD decos name superclasses members) =
         , classTypeParameters = []
         , classBody = [ClassProperty ref_var_decl,
                        generateClassProxyDefaultConstructor c,
-                       generateClassProxyConstructor c] ++ map convertClassMember members
+                       generateClassProxyConstructor c] ++ map convertClassMember (filter (not . isStaticDecl) members)
         }
 
 generateProxyTransformer :: Ts.ClassD -> Kt.Object
@@ -223,9 +223,9 @@ convertGlobalFuncBody (FuncD Func name decos params ret_ty) =
     let ark_module_path = getArkModulePath decos
         common_body = [
                 DeclarationAssignmentStmt M_Val "mod" (CallExpr (IdentifierExpr "ArkModule")  [] [(LiteralString ark_module_path)]),
-                DeclarationAssignmentStmt M_Val "entfdasry" (CallExpr (IdentifierExpr "ArkObjectSafeReference") []
+                DeclarationAssignmentStmt M_Val "entry" (CallExpr (IdentifierExpr "ArkObjectSafeReference") []
                                                 [CallExpr (MemberExpr (IdentifierExpr "mod") "getNapiValue") [] []]),
-                DeclarationAssignmentStmt M_Val "func" (CallExpr (MemberExpr (IdentifierExpr "enfdsadtry") "get")  [] [LiteralString name])]
+                DeclarationAssignmentStmt M_Val "func" (CallExpr (MemberExpr (IdentifierExpr "entry") "get")  [] [LiteralString name])]
         return_type = (defaultType ret_ty)
         -- (func!!.invoke<ArkObjectSafeReference>())!!
         ret_stmt = (OpPostfix
@@ -335,7 +335,7 @@ convertVar (VarD decos _ n ty) =
         set_fun = if Kt.isPrimType kt_ty
                     then let fun = "set" ++ Kt.getRefTypeName kt_ty
                             in ExpressionStmt $ CallExpr (MemberExpr (IdentifierExpr "ref") fun)
-                                [] [LiteralString n, IdentifierExpr n]
+                                [] [LiteralString n, IdentifierExpr "value"]
                     else ExpressionStmt $ CallExpr (IdentifierExpr ("setProperty"))
                                 [] [LiteralString n, IdentifierExpr "value"]
 
