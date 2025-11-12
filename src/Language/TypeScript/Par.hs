@@ -184,16 +184,37 @@ pFuncParam = do
 
 pType :: HasCallStack => Parser Type
 pType = do
-    n <- pop
+    n <- peek
     case kind n of
-        "NumberKeyword" -> return $ TyRef "number"
-        "StringKeyword" -> return $ TyRef "string"
-        "BooleanKeyword" -> return $ TyRef "boolean"
-        "BigIntKeyword" -> return $ TyRef "bigint"
+        "NumberKeyword" -> skip >> (return $ TyRef "number")
+        "StringKeyword" -> skip >> (return $ TyRef "string")
+        "BooleanKeyword" -> skip >> (return $ TyRef "boolean")
+        "BigIntKeyword" -> skip >> (return $ TyRef "bigint")
         "ArrayType" -> return $ TyArray (TyRef "any")  -- TODO: parse element type
         "TypeReference" -> do
-            let ident = fromJust $ content $ head $ fromJust $ children n
-            return $ TyRef ident
+            pushKindChildren "TypeReference"
+            n' <- peek
+            case kind n' of
+                    "Identifier" -> do
+                        ident <- pKindContent "Identifier"
+                        return $ TyRef ident
+                    "FirstNode" -> do
+                        pushKindChildren "FirstNode"
+                        idents <- sepBy (pKindContent "Identifier") (eat ".")
+                        -- if there is <...> , then it's a type application
+                        nd <- peek
+                        case kind nd of
+                            "FirstBinaryOperator" -> do
+                                eat "<"
+                                pushKindChildren "SyntaxList"
+                                type_args <- sepBy pType (eat ",")
+                                eat ">"
+                                let base_type = TyRef (last idents)
+                                let namespace = init idents
+                                let qual_type = QualifiedType namespace base_type
+                                return $ TyApp qual_type type_args
+                            _ -> return $ QualifiedType (init idents) (TyRef (last idents))
+                    _ -> error $ "Unsupported TypeReference child kind: " ++ show n'
         _ -> error $ "Unsupported type kind: " ++ show n
 
 pModifiers :: HasCallStack => Parser [Modifier]

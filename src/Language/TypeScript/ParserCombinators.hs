@@ -103,6 +103,9 @@ peekKind s = do
 push :: HasCallStack => [TsNode] -> Parser ()
 push ns = StateT $ \nodes -> Right ((), ns ++ nodes)
 
+pushNode :: HasCallStack => TsNode -> Parser ()
+pushNode n = push [n]
+
 pop :: HasCallStack => Parser TsNode
 pop = StateT $ \nodes -> case nodes of
     [] -> Left (error "no more nodes")

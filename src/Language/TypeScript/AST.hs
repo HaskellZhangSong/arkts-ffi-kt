@@ -2,6 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Language.TypeScript.AST where
 import Data.Derive.IsDataCon
+import Language.Kotlin.AST (KotlinType(QualifiedType))
 data Decorator = Decorator {
     name :: String
 } | DecoratorPara {
@@ -14,13 +15,14 @@ data SourceFile = SourceFile [Decl]
 
 data Type = 
       TyRef { typeName :: String }
-    | TyApp String [Type]
+    | TyApp Type [Type]
     | TyFun [Type] Type
     | TyNullable Type
     | TyArray Type
     | TyUnion [Type]
     | TyIntersection [Type]
     | TyTuple [Type]
+    | QualifiedType [String] Type
     deriving (Show, Eq, Ord)
 
 isPrimType :: Type -> Bool
