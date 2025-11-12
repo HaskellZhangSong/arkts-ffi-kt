@@ -115,3 +115,14 @@ object BarProxyTransformer : ArkTsExportCustomTransformer<BarProxy> {
 ```
 
 A default kotlin type will be used if variable type and function/method parameter type are not given in its annotation.
+
+```typescript
+@ExportKotlinImport({"package": "com.huawei.MusicEnum"})
+import { com_example_AwemeType } from "./example_enum"
+```
+
+will generate
+
+```kotlin
+import com.huawei.MusicEnum
+```
