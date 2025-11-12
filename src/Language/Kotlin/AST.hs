@@ -29,6 +29,7 @@ data KotlinDeclaration
   | ObjectDecl Object
   | DataClassDecl DataClass
   | EnumDecl KotlinEnum
+  | ImportDecl Import
   deriving (Eq, Show)
 
 data Annotation = Annotation
@@ -262,6 +263,7 @@ instance Pretty KotlinDeclaration where
   pretty (DataClassDecl datacls) = pretty datacls
   pretty (EnumDecl enum) = pretty enum
   pretty (VarDecl var) = pretty var
+  pretty (ImportDecl imp) = pretty imp
 
 instance Pretty Class where
   pretty (Class anno name mods tyParams fdParams supers body) =

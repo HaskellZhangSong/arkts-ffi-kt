@@ -12,12 +12,16 @@ import Options
 import System.Console.CmdArgs (CmdArgs)
 import Debug.Trace
 import Language.Kotlin.AST (getRefTypeName)
+import Data.Text.Internal.Read (T)
+import qualified Language.Kotlin.AST as Kt
 
 -- Should check if decorator is corectly
 hasDecorator :: Decl -> Bool
 hasDecorator (Ts.FuncDecl (Ts.FuncD _ _ [] _ _)) = False
 hasDecorator (Ts.VarDecl (Ts.VarD [] [] _ _)) = False
 hasDecorator (Ts.ClassDecl (Ts.ClassD [] _ _ _)) = False
+hasDecorator (Ts.ImportDecl i) = not $ null (Ts.importDecorators i)
+
 hasDecorator _ = True
 
 convertSourceFile :: CmdOptions -> SourceFile -> Kt.KotlinFile
@@ -40,10 +44,28 @@ convertSourceFile opts (SourceFile decls) =
         }
 
 convertDecl :: Decl -> [Kt.KotlinDeclaration]
+convertDecl (Ts.ImportDecl i) = [Kt.ImportDecl $ convertImport i]
 convertDecl (Ts.FuncDecl f) = [Kt.FunctionDecl $ convertFunc f]
 convertDecl (Ts.VarDecl v) = [Kt.PropertyDecl $ convertVar v]
 convertDecl (Ts.ClassDecl c) = [Kt.ClassDecl $ convertClass c] ++
                                 [Kt.ObjectDecl $ generateProxyTransformer c]
+
+get_import_package_name :: [Decorator] -> Maybe String
+get_import_package_name (d:ds) =
+    case d of
+        (DecoratorPara _ p) ->
+            case L.lookup "package" p of
+                Just name -> Just name
+                Nothing -> Nothing  
+        _ -> Nothing
+get_import_package_name _ = Nothing
+
+convertImport :: Ts.ImportD -> Kt.Import
+convertImport imp = let deco = importDecorators imp
+                        package_name_maybe = get_import_package_name deco
+                    in case package_name_maybe of
+                         Just package_name -> Kt.Import package_name
+                         Nothing -> error $ "Import decorator missing package name: " ++ show imp
 
 convertClassMember :: Decl -> Kt.ClassMember
 convertClassMember (Ts.FuncDecl f) = Kt.ClassFunction $ convertFunc f

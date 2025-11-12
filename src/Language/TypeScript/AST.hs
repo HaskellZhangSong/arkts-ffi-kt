@@ -31,10 +31,28 @@ isPrimType _ = False
 
 
 
-data Decl = ClassDecl ClassD
+data Decl = ImportDecl ImportD
+          | ClassDecl ClassD
           | FuncDecl FuncD
           | VarDecl VarD
           deriving (Show, Eq, Ord)
+
+data ImportD = NamedImport {
+        importDecorators :: [Decorator],
+        importNames :: [String],
+        importFile :: String
+    } |
+    NamespaceImport {
+        importDecorators :: [Decorator],
+        importNamespace :: String,
+        importFile :: String
+    } | 
+    DefaultImport {
+        importDecorators :: [Decorator],
+        importName :: String,
+        importFile :: String
+    }   
+    deriving (Show, Eq, Ord)
 
 data ClassD = ClassD {
     classDecorators :: [Decorator],

@@ -55,6 +55,9 @@ pDecl = do
         "Constructor" -> do
             constr_decl <- pConstrDecl
             return $ FuncDecl constr_decl
+        "ImportDeclaration" -> do
+            import_decl <- pImport
+            return $ ImportDecl import_decl
         _ -> do
             lift $ Left n
 
@@ -270,6 +273,43 @@ pFuncDecl = do
     eat "function"
     
     pAbsFuncPart Func decos
+
+pImport :: HasCallStack => Parser ImportD
+pImport = do
+    pushKindChildren "ImportDeclaration"
+    decos <- pDecorators
+    eat "import"
+    pushKindChildren "ImportClause"
+    -- maybe
+    import_type <- peek
+    case kind import_type of
+        "NamedImports" -> do
+                        pushKindChildren "NamedImports"
+                        eat "{"
+                        pushKindChildren "SyntaxList"
+                        names <- sepBy (pushKindChildren "ImportSpecifier" >> pKindContent "Identifier") (eat ",")
+                        eat "}"
+                        eat "from"
+                        file <- pKindContent "StringLiteral"
+                        void $ many (eat ";")
+                        return $ NamedImport decos names file
+        "NamespaceImport" -> do
+                        pushKindChildren "NamespaceImport"
+                        eat "*"
+                        eat "as"
+                        name <- pKindContent "Identifier"
+                        eat "from"
+                        file <- pKindContent "StringLiteral"
+                        void $ many (eat ";")
+                        return $ NamespaceImport decos name file
+        "Identifier" -> do
+                        name <- pKindContent "Identifier"
+                        eat "from"
+                        file <- pKindContent "StringLiteral"
+                        void $ many (eat ";")
+                        return $ DefaultImport decos name file
+        _ -> lift $ Left import_type
+
 
 pInterfaceDecl = undefined
 

@@ -31,7 +31,8 @@ decl_list :: [String]
 decl_list = [
     "ClassDeclaration",
     "FunctionDeclaration",
-    "PropertyDeclaration"
+    "PropertyDeclaration",
+    "ImportDeclaration"
     ]
 
 filterSourceFile :: TsNode -> TsNode
@@ -44,3 +45,4 @@ filterSyntax :: TsNode -> TsNode
 filterSyntax (TsNode "SyntaxList" (Just chn) cont p) = 
     TsNode "SyntaxList" (Just $ filter (\child -> kind child `elem` decl_list) chn) cont p
 filterSyntax _ = error "Not a SyntaxList node"
+
